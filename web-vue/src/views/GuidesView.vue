@@ -4,21 +4,16 @@ import { onMounted, ref, computed } from "vue";
 const guides = ref([]);
 const query = ref("");
 const filteredGuides = computed(() => {
-  return guides.value.filter((g) => {
-    if (g.title.toLowerCase().includes(query.value.toLowerCase())) {
-      return g;
-    }
-  });
+  return guides.value.filter((g) =>
+    g.title.toLowerCase().includes(query.value.toLowerCase()),
+  );
 });
+
 const loading = ref(true);
 const error = ref("");
 
 const filteredGuidesCount = computed(() => {
   return filteredGuides.value.length;
-});
-
-const totalGuidesCount = computed(() => {
-  return guides.value.length;
 });
 
 onMounted(async () => {
@@ -42,14 +37,14 @@ onMounted(async () => {
   <input type="text" placeholder="sök guider" v-model="query" />
 
   <div>
-    <span v-if="filteredGuidesCount > 0">
-      {{ filteredGuidesCount }} av {{ totalGuidesCount }} träffar
-    </span>
-    <span v-else>Inga träffar</span>
+    <p v-if="loading">Laddar...</p>
+    <p v-if="error">{{ error }}</p>
   </div>
 
-  <p v-if="loading">Laddar...</p>
-  <p v-if="error">{{ error }}</p>
+  <div>
+    <p v-if="filteredGuidesCount > 0">{{ filteredGuidesCount }} träffar</p>
+    <p v-else>Inga träffar</p>
+  </div>
 
   <ul>
     <li v-for="guide in filteredGuides" v-key="guide.id">
