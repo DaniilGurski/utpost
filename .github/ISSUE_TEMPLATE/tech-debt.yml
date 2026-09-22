@@ -1,0 +1,54 @@
+name: Tech debt
+description: A problem in the codebase that needs to be fixed
+title: "[TD-xx] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where
+      description: Files and line numbers, and the commit they refer to.
+      placeholder: "`api/src/routes/guides.js` lines 22-25 (@ 2bd9623)"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: What can go wrong because of this?
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: "High: security hole, exposed secrets, data loss or crash on normal use. Medium: hurts performance or maintainability enough to slow the team or users. Low: inconsistency or missing polish with no real risk."
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - api
+        - web
+        - db
+        - docs
+    validations:
+      required: true
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked by
+      description: Issue numbers that must be done first, if any.
+      placeholder: "#12"
