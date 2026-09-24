@@ -1,5 +1,6 @@
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
   // add more generic rulesets here, such as:
@@ -17,4 +18,5 @@ export default [
       },
     },
   },
+  eslintConfigPrettier,
 ];
