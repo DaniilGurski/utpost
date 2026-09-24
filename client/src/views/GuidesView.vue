@@ -34,11 +34,13 @@ onMounted(async () => {
 
 <template>
   <h1>Guides View</h1>
-  <input type="text" placeholder="sök guider" v-model="query" />
+  <input v-model="query" type="text" placeholder="sök guider" />
 
   <div>
     <p v-if="loading">Laddar...</p>
-    <p v-if="error">{{ error }}</p>
+    <p v-if="error">
+      {{ error }}
+    </p>
   </div>
 
   <div>
@@ -47,7 +49,7 @@ onMounted(async () => {
   </div>
 
   <ul>
-    <li v-for="guide in filteredGuides" v-key="guide.id">
+    <li v-for="guide in filteredGuides" :key="guide.id">
       <span>{{ guide.title }} </span>
     </li>
   </ul>

@@ -16,7 +16,7 @@ import { RouterLink, RouterView } from "vue-router";
       <HelloWorld msg="You did it!" />
 
       <nav>
-        <RouterLink to="/guides">Guides</RouterLink>
+        <RouterLink to="/guides"> Guides </RouterLink>
       </nav>
     </div>
   </header>
