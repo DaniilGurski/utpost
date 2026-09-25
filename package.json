@@ -14,6 +14,7 @@
     "dev:client": "npm run dev -w client",
     "lint": "npm run lint -w client",
     "format:check": "npm run format:check -w client",
+    "format:write": "npm run format:write -w client",
     "test": "npm run test -w client",
     "build": "npm run build -w client",
     "seed": "npm run seed -w api"
