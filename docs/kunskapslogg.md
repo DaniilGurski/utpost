@@ -49,17 +49,22 @@ Nej.
 **Kursmål:** Fullstack 5 · Cloud 3
 
 ### Vad jag förstått
-Fullstack 5:
+Fullstack 5: Fokus för mig låg helt på Cloud/CI denna vecka.
 
-Cloud 3: För push och commit till GH använder vi trunk-based development med relativt frekventa pull requests, vilket jag inte gjort innan. 
+Cloud 3: Sätta upp en yaml-fil för CI workflow med korrekt indentering och syntax. Den triggas av en PR/push och körs i ordning på tom maskin. Lärde mig att en required status check måste matcha jobbnamnet exakt i rulesetet.
+Pipelinen failade första gången ("No test files found") — löste genom ett enkelt fristående test under client.
 
 ### Var det syns i mitt arbete
 Fullstack 5:
 
-Cloud 3:
+Cloud 3: .github/workflows/ci.yml, client/src/sanity.test.js
 
 ### Kvar att förstå
-
+Hur man cachar npm-beroenden i GitHub Actions för att korta ner `npm ci`-
+steget (som tog överlägset längst tid i körningen). Även hur man skriver
+riktiga komponenttester (t.ex. med @vue/test-utils) mot GuideCard/GuidesView,
+i stället för det minimala sanity-testet jag lade till bara för att verifiera
+att pipelinen fungerade.
 
 ### Siktar på VG
 Nej.
