@@ -21,6 +21,8 @@ Appen ligger sen på http://localhost:3001 och API:et på http://localhost:4000.
 
 ## Arbetssätt
 
+### Så ser ett vanligt arbetsflöde ut
+
 ```bash
 # 1. Skapa branchen från din issue på GitHub (Development-sektionen) och checka ut den
 git commit --allow-empty -m "chore: #<id> init"
@@ -31,6 +33,20 @@ npm run lint && npm run format:check && npm run test -- --run
 ```
 
 Brancher ska vara korta: små PR:er mergas snabbt, så vi får färre konflikter och slipper långa brancher som glider isär från `main`.
+
+### Git
+
+1. **Branch:** skapa en branch från en issue på GitHub (under _Development_-sektionen) och följ instruktionerna där.
+2. **Init-commit:** gör en tom commit innan du börjar jobba:
+   `git commit --allow-empty -m "chore: #<id> init"`
+3. **Draft-PR:** skapa en draft-PR för branchen på GitHub, så att teamet kan följa arbetet.
+4. **Pusha ofta:** `git push origin HEAD`
+5. **Commits:** använd conventional commits (`typ: beskrivning`):
+   - `feat`: något nytt
+   - `fix`: buggfix
+   - `docs`: dokumentation (markdown)
+   - `chore`: organisation och justeringar som inte lägger till något nytt
+6. **Ready for review:** kör lint, `format:check` och testerna (`npm run lint`, `npm run format:check`, `npm run test -- --run`). Fixa allt som är rött innan du markerar PR:en som ready.
 
 ### Kommunikation
 
