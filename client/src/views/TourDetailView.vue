@@ -1,7 +1,7 @@
 <script setup>
 import { watch, ref, computed } from "vue";
 
-const props = defineProps({
+const { id = "" } = defineProps({
   id: String,
 });
 
