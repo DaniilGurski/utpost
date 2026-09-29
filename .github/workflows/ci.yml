@@ -3,8 +3,8 @@ on:
   pull_request:
   push:
     branches: ["main"]
-    permissions: 
-      contents: read
+permissions:
+  contents: read
 jobs:
   quality:
     name: Kvalitet
@@ -19,7 +19,7 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run test
-      
+
   build:
     name: Bygg
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build 
+      - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
           name: dist
