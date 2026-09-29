@@ -1,7 +1,6 @@
 # CI-pipeline
 
 ## Flöde: från commit till merge
-
 ```mermaid
 flowchart TD
     A[Commit + push till feature-branch] --> B[Öppna/uppdatera PR mot main]
@@ -17,7 +16,7 @@ flowchart TD
     end
 
     Q -->|grön| BLD
-    Q -->|röd| X[PR blockeras, build körs aldrig]
+    Q -->|röd| X[PR blockeras]
     X -->|fixa och pusha igen| A.
 
     subgraph BLD [Jobb: build / Bygg, needs: quality]
@@ -32,48 +31,43 @@ flowchart TD
     R -->|nej| X
     M --> P[Workflow körs igen: on push till main]
 ```
-
 ## Vad varje steg fångar
-
-| Steg | Fångar |
-|---|---|
-| `npm ci` | Lockfil och `package.json` som inte stämmer överens; garanterar exakta versioner |
-| `lint` | Kodproblem och misstänkta mönster (ESLint) |
-| `format:check` | Filer som inte följer Prettier. Kontrollerar bara, ändrar aldrig |
-| `test` | Regressioner i beteende (Vitest) |
-| `build` | Trasiga importer och byggfel som lint och test kan missa |
-| Ruleset | Att inget mergas utan PR, review och gröna checks |
-
-## Uppmätta tider (en körning)
+| Steg           | Fångar                                                                           |
+| -------------- | -------------------------------------------------------------------------------- |
+| npm ci       | Lockfil och package.json som inte stämmer överens; garanterar exakta versioner |
+| lint         | Kodproblem och misstänkta mönster (ESLint)                                       |
+| format:check | Filer som inte följer Prettier. Kontrollerar bara, ändrar aldrig                 |
+| test         | Regressioner i beteende (Vitest)                                                 |
+| build        | Trasiga importer och byggfel som lint och test kan missa                         |
+| Ruleset        | Att inget mergas utan PR, review och gröna checks                                |
 
 ## Uppmätta tider (en körning)
 
-Körning: [2026-09-28] · Sekventiell (`needs: quality`): ja
+Körning: [2026-09-28] · Sekventiell (needs: quality): ja
 
-| Steg | Kvalitet | Bygg |
-|---|---|---|
-| Set up job | 0s | 1s |
-| checkout | 1s | 1s |
-| setup-node | 1s | 1s |
-| `npm ci` | 5s | 5s |
-| lint | 2s | – |
-| format:check | 0s | – |
-| test | 2s | – |
-| build | – | 1s |
-| upload-artifact | – | 1s |
-| Post-steg + Complete job (differens) | 2s | 2s |
-| **Jobbtid enligt GitHub** | **13s** | **12s** |
+| Steg                                 | Kvalitet | Bygg    |
+| ------------------------------------ | -------- | ------- |
+| Set up job                           | 0s       | 1s      |
+| checkout                             | 1s       | 1s      |
+| setup-node                           | 1s       | 1s      |
+| npm ci                               | 5s       | 5s      |
+| lint                                 | 2s       | –       |
+| format:check                         | 0s       | –       |
+| test                                 | 2s       | –       |
+| build                                | –        | 1s      |
+| upload-artifact                      | –        | 1s      |
+| Post-steg + Complete job (differens) | 2s       | 2s      |
+| **Jobbtid enligt GitHub**            | 13s      | 12s     |
 
 **Total pipeline-tid (vägg-tid):** 30s (jobben summerar till 25s, resten är
 uppstart av runners och väntan mellan jobben)
-
 
 ## Ruleset på `main`
 
 Bekräfta uppgifterna med den som ställt in rulesetet:
 
-- Pull request krävs innan merge
-- Minst en godkännare
+- Restrict deletions
+- Pull request krävs innan merge, minst en godkännare
 - Required status checks: `Kvalitet` och `Bygg`
-- "Require branch to be up to date before merging": ja
-- Direktpush till `main` blockerad: ja
+- Branchen som mergas behöver vara up to date med main
+- Blockera force push
