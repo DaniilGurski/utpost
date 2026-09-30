@@ -5,18 +5,22 @@ const loading = ref(false);
 const error = ref("");
 
 onMounted(async () => {
-  loading.value = true;
-  const res = await fetch("http://localhost:4000/api/tours");
+  try {
+    loading.value = true;
+    const res = await fetch(`http://localhost:4000/api/tours`);
 
-  if (!res.ok) {
-    error.value = "Ett fel har inträffad. Försök igen!";
+    if (!res.ok) {
+      throw new Error("Ett fel har inträffad. Försök igen!");
+    }
+
+    const data = await res.json();
+    tours.value = data;
+  } catch (err) {
+    error.value = err.message;
+    console.log(err);
+  } finally {
     loading.value = false;
-    throw new Error("Failed to get tours");
   }
-
-  const data = await res.json();
-  tours.value = data;
-  loading.value = false;
 });
 </script>
 
@@ -55,7 +59,7 @@ onMounted(async () => {
     </tbody>
   </table>
 
-  <p v-else>Inga turer</p>
+  <p v-else-if="!loading && !error">Inga turer</p>
 </template>
 
 <style></style>
