@@ -2,7 +2,10 @@
 import { watch, ref, computed } from "vue";
 
 const props = defineProps({
-  id: String,
+  id: {
+    type: String,
+    default: "",
+  },
 });
 
 const tour = ref(null);
