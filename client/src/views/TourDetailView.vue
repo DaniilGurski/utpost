@@ -1,8 +1,11 @@
 <script setup>
 import { watch, ref, computed } from "vue";
 
-const { id = "" } = defineProps({
-  id: String,
+const props = defineProps({
+  id: {
+    type: String,
+    default: "",
+  },
 });
 
 const tour = ref(null);
@@ -24,18 +27,24 @@ TODO: Should use `tour` as a prop instead of fetching it.
 This mirrors the original React component `TourDetail` for M1
 */
 const load = async () => {
-  loading.value = true;
-  const res = await fetch(`http://localhost:4000/api/tours/${props.id}`);
+  try {
+    loading.value = true;
+    tour.value = null;
+    error.value = "";
+    const res = await fetch(`http://localhost:4000/api/tours/${props.id}`);
 
-  if (!res.ok) {
-    error.value = "Ett fel har inträffad. Försök igen!";
+    if (!res.ok) {
+      throw new Error("Ett fel har inträffad. Försök igen!");
+    }
+
+    const data = await res.json();
+    tour.value = data;
+  } catch (err) {
+    error.value = err.message;
+    console.log(err);
+  } finally {
     loading.value = false;
-    throw new Error("Failed to get tours");
   }
-
-  const data = await res.json();
-  tour.value = data;
-  loading.value = false;
 };
 
 watch(() => props.id, load, { immediate: true });
