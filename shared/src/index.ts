@@ -42,4 +42,4 @@ type TourLog = {
   note: string | null;
 };
 
-export type { User, Tour, TourLog };
+export type { Guide, User, Tour, TourLog };
