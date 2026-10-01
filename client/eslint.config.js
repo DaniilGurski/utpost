@@ -16,7 +16,11 @@ export default [
       globals: {
         ...globals.browser,
       },
+      parserOptions: {
+      parser: "@typescript-eslint/parser",
+    }
     },
+    
   },
   eslintConfigPrettier,
 ];

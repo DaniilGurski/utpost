@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
-import type {Guide} from "@utpost/shared";
+import type { Guide } from "@utpost/shared";
 import GuideCard from "../components/GuideCard.vue";
 
 const guides = ref<Guide[]>([]);
@@ -20,7 +20,7 @@ const filteredGuidesCount = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  const res = await fetch("http://localhost:4000/api/guides"); 
+  const res = await fetch("http://localhost:4000/api/guides");
   // const res = await get("/guides");
 
   if (!res.ok) {
