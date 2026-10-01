@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
 import type {Guide} from "@utpost/shared";
-import { get } from "../api";
 import GuideCard from "../components/GuideCard.vue";
 
 const guides = ref<Guide[]>([]);
