@@ -1,7 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
+import type {Guide} from "@utpost/shared";
+import { get } from "../api";
+import GuideCard from "../components/GuideCard.vue";
 
-const guides = ref([]);
+const guides = ref<Guide[]>([]);
 const query = ref("");
 const filteredGuides = computed(() => {
   return guides.value.filter((g) =>
@@ -18,10 +21,11 @@ const filteredGuidesCount = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  const res = await fetch("http://localhost:4000/api/guides");
+  const res = await fetch("http://localhost:4000/api/guides"); 
+  // const res = await get("/guides");
 
   if (!res.ok) {
-    error.value = "Ett fel har inträffad. Försök igen!";
+    error.value = "Ett fel har inträffat. Försök igen!";
     loading.value = false;
     throw new Error("Failed to get guides");
   }
@@ -50,7 +54,7 @@ onMounted(async () => {
 
   <ul>
     <li v-for="guide in filteredGuides" :key="guide.id">
-      <span>{{ guide.title }} </span>
+      <GuideCard :guide="guide" />
     </li>
   </ul>
 </template>
