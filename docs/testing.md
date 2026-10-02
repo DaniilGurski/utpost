@@ -1,39 +1,58 @@
-# Testing Strategy
+# Teststrategi – Utpost
 
-## Datum
+_Beslutsdokument. Skrivs av teamet i M2 och hålls levande. Det är det första av teamets sex beslutsdokument – samma mall som de andra i `docs/decisions/`._
 
-2026-10-02
-
-## Beslut
-
--
+**Datum:** 2026-10-
+**Beslut:** …
 
 ## Bakgrund
 
-Bestämma test strategi innan vi börjar skriva tester för appen så att alla ligger på samma spår
+Vad behövde vi lösa? (Ärvd kod utan tester, pipelinen kör ett röktest, sex vyer kvar att porta …)
+Utpost hade bara en sanity test
 
 ## Nivåer
 
-- enhets
-- komponent
-- e2e
+Enhet (Vitest): …
+Komponent (Vitest + Vue Testing Library): …
+API (kommer i M5): …
+E2E: …
 
-## Test karta
+## Karta: vad testas var
 
-- Climb funktionen i `client/src/views/TourDetailView.vue` räknar rätt
+| Del av Utpost | Beteende                                                    | Nivå      | Varför just där?                                           | Finns test i dag? |
+| ------------- | ----------------------------------------------------------- | --------- | ---------------------------------------------------------- | ----------------- |
+| `elevationGain` | summerar bara stigningar, inte nedförsbackar              | enhet     | ren funktion, ingen Vue eller API behövs                   | ja                |
+| `elevationGain` | tom tur ger 0                                             | enhet     | ren funktion, kantfall                                     | ja                |
+| `elevationGain` | hoppar över mätpunkter utan höjd i stället för att räkna 0 | enhet     | ren funktion, kantfall som annars ger fel höjdmeter        | ja                |
+| `GuidesView`  | sökfältet filtrerar guider på titel                         | komponent | sökningen är logik som användaren ser först                | ja                |
+| `GuidesView`  | visar "N träffar" eller "Inga träffar" efter sökning        | komponent | räknaren är det användaren läser av efter en sökning       | nej               |
+| `GuidesView`  | visar felmeddelande när API:et failar                       | komponent | felvägen får inte krascha vyn eller lämna den tom          | nej               |
+| `ToursView`   | tabellen visar tur, av, guide, längd och bilder när data kommer | komponent | huvudflödet: användaren ska se sina turer                | nej               |
+| `ToursView`   | visar "Inga turer" när listan är tom                        | komponent | tomt läge ska skilja sig från laddning och fel             | nej               |
+| `ToursView`   | visar felmeddelande när API:et failar                       | komponent | felvägen får inte krascha vyn eller lämna den tom          | nej               |
+| `TourDetailView` | visar längd, antal mätpunkter och höjdmeter för en tur   | komponent | här fanns höjdmeterbuggen, siffran måste stämma med datan  | nej               |
+| `TourDetailView` | visar felmeddelande när API:et failar                    | komponent | felvägen får inte krascha vyn eller lämna den tom          | nej               |
 
-## PR merge regler
+## Regler
 
-Testerna visar grönt, implemntationen speglar beteendet som beskrivs i testerna?
+- En PR mergas bara när …
+- En buggfix …
+- Vi mockar API:et genom …
+- Täckning: …
+- Testfiler ligger … och heter …
 
 ## Vad vi medvetet inte testar
 
-Vi testar inte implementationen men logiken. Implemnationen ändras hela tiden, logiken bevaras.
+…
 
-## Alternativ ni jämförde
+## Alternativ vi jämförde
 
--
+…
 
 ## Konsekvenser
 
--
+…
+
+## Kommandon
+
+npm test · npm run test:watch --workspace=client
