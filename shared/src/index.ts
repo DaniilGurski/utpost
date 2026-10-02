@@ -6,39 +6,39 @@ type Guide = {
   difficulty: string;
   length_km: number; // NOTE: should be double precision
   body_html: string;
-  heroImage: string | null;
+  hero_image: string | null;
   published: boolean;
-  authorId: number | null;
-  updatedAt: string;
+  author_id: number | null;
+  updated_at: string;
 };
 
 type User = {
   id: number;
   email: string;
-  passwordHash: string;
-  displayName: string;
+  password_hash: string;
+  display_name: string;
   role: string;
-  createdAt: string;
+  created_at: string;
 };
 
 type Tour = {
   id: number;
-  userId: number;
-  guideId: number | null;
+  user_id: number;
+  guide_id: number | null;
   title: string;
-  startedAt: string;
-  distanceM: number;
+  started_at: string;
+  distance_m: number;
   notes: string | null;
 };
 
 type TourLog = {
   id: number;
-  tourId: number;
-  recordedAt: string;
+  tour_id: number;
+  recorded_at: string;
   lat: number;
   lon: number;
-  elevationM: number | null;
-  heartRate: number | null;
+  elevation_m: number | null;
+  heart_rate: number | null;
   note: string | null;
 };
 
