@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "seed": "node src/db/seed.js"
+    "seed": "node src/db/seed.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@utpost/shared": "^0.0.0",

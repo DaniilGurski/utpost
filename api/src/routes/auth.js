@@ -13,6 +13,7 @@ authRouter.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'fel uppgifter' });
   }
   res.json({ token: sign(user), user });
+  
 });
 
 authRouter.post('/register', async (req, res) => {
