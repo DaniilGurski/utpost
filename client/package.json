@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:check": "prettier --check src/",
-    "format:write": "prettier --write src/"
+    "format:write": "prettier --write src/",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@utpost/shared": "^0.0.0",
