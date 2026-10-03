@@ -18,10 +18,12 @@
     "format:write": "npm run format:write -w client",
     "test": "npm run test -w client",
     "build": "npm run build -w client",
-    "seed": "npm run seed -w api"
+    "seed": "npm run seed -w api",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w api"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "typescript": "~6.0.0"
   }
+  
 }
