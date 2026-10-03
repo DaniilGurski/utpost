@@ -1,30 +1,32 @@
 # Kunskapslogg – Douglas
+
 Cloud, CI/CD och arbetsmetodik + Avancerad fullstackutveckling, v. 38–51 2026
 
 ## Sammanfattningstabell
 
-| Kursmål | Post i vecka | Var det syns i mitt arbete | Siktar på VG |
-|---|---|---|---|
-| Fullstack 4 | 38 | | – |
-| Fullstack 5 | 39 | | – |
-| Cloud 3 | 39 | | – |
-| Fullstack 3 | 40 | | – |
-| Cloud 5 | 40 | | – |
-| Cloud 6 | 40 | | – |
-| Fullstack 1 | 41 | | – |
-| Cloud 4 | 41 | | – |
-| Fullstack 2 | 42 | | – |
-| Cloud 1 | 44 | | – |
-| Cloud 2 | 45 | | – |
-| Fullstack 8 | 46 | | – |
-| Fullstack 9 | 47 | | – |
-| Fullstack 6 | 48 | | – |
-| Fullstack 7 | 48 | | – |
-| Fullstack 19 | 49 | | – |
+| Kursmål      | Post i vecka | Var det syns i mitt arbete | Siktar på VG |
+| ------------ | ------------ | -------------------------- | ------------ |
+| Fullstack 4  | 38           |                            | –            |
+| Fullstack 5  | 39           |                            | –            |
+| Cloud 3      | 39           |                            | –            |
+| Fullstack 3  | 40           |                            | –            |
+| Cloud 5      | 40           |                            | –            |
+| Cloud 6      | 40           |                            | –            |
+| Fullstack 1  | 41           |                            | –            |
+| Cloud 4      | 41           |                            | –            |
+| Fullstack 2  | 42           |                            | –            |
+| Cloud 1      | 44           |                            | –            |
+| Cloud 2      | 45           |                            | –            |
+| Fullstack 8  | 46           |                            | –            |
+| Fullstack 9  | 47           |                            | –            |
+| Fullstack 6  | 48           |                            | –            |
+| Fullstack 7  | 48           |                            | –            |
+| Fullstack 19 | 49           |                            | –            |
 
 ---
 
 ## Vecka 38 – Ramverket och arbetssättet
+
 **Kursmål:** Fullstack 4
 
 ### Vad jag förstått
@@ -33,7 +35,7 @@ Fullstack 4: Mycket logik som finns i react finns även i vue men under annat na
 
 ### Var det syns i mitt arbete
 
- `GuideCard.vue` (fungerar korrekt i `v-for` i `GuidesView.vue`)
+`GuideCard.vue` (fungerar korrekt i `v-for` i `GuidesView.vue`)
 och `router/index.js`, där routen för `/guider/:slug` felaktigt pekar direkt på GuideCard utan en "mellan-komponent".
 
 ### Kvar att förstå
@@ -41,25 +43,30 @@ och `router/index.js`, där routen för `/guider/:slug` felaktigt pekar direkt p
 Jag behöver skapa en komponent som är ett mellanled mellan routingen och komponenten som renderar UI.
 
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 39 – Routing, state och CI
+
 **Kursmål:** Fullstack 5 · Cloud 3
 
 ### Vad jag förstått
+
 Fullstack 5: Fokus för mig låg helt på Cloud/CI denna vecka.
 
 Cloud 3: Sätta upp en yaml-fil för CI workflow med korrekt indentering och syntax. Den triggas av en PR/push och körs i ordning på tom maskin. Lärde mig att en required status check måste matcha jobbnamnet exakt i rulesetet.
 Pipelinen failade första gången ("No test files found") — löste genom ett enkelt fristående test under client.
 
 ### Var det syns i mitt arbete
+
 Fullstack 5:
 
 Cloud 3: .github/workflows/ci.yml, client/src/sanity.test.js
 
 ### Kvar att förstå
+
 Hur man cachar npm-beroenden i GitHub Actions för att korta ner `npm ci`-
 steget (som tog överlägset längst tid i körningen). Även hur man skriver
 riktiga komponenttester (t.ex. med @vue/test-utils) mot GuideCard/GuidesView,
@@ -67,207 +74,285 @@ i stället för det minimala sanity-testet jag lade till bara för att verifiera
 att pipelinen fungerade.
 
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 40 – TypeScript och kvalitetssäkring
+
 **Kursmål:** Fullstack 3 · Cloud 5, 6
 
 ### Vad jag förstått
-Fullstack 3:
 
-Cloud 5:
+Fullstack 3: `elevation_m` är `number | null`, så TypeScript kräver att jag
+hanterar `null` innan jag räknar. I JS hade `150 - null` tyst blivit 150.
+I `elevationGain` hoppar jag över `null` med `continue` och sparar senaste giltiga
+värdet i `let previous: number | null`. `ref<Guide[]>` talar om vilken typ jag förväntar mig, men TypeScript kontrollerar bara koden, inte vad API:et faktiskt skickar tillbaka vid körning.
+
+Cloud 5: Ett test ska kontrollera ett beteende. Mitt test för `elevationGain`
+kontrollerar att bara stigningar räknas: [100, 150, 120, 180] ger 110, och
+nedförsbacken drar inte av något. Jag skrev också medvetet ett test som blev rött
+lokalt (sökordet 'små' matchar Småland, så texten för tom träff visades aldrig)
+och rättade sedan sökordet till 'fjfjg'.
 
 Cloud 6:
 
 ### Var det syns i mitt arbete
-Fullstack 3:
 
-Cloud 5:
+Fullstack 3: `client/src/views/GuidesView.vue` (`ref<Guide[]>`). `elevationGain` finns i
+utpost-ts-douglas-daniil-garen/client/src/lib/tours.ts
+
+```ts
+export const elevationGain = (logs: TourLog[]): number => {
+  let gain = 0;
+  let previous: number | null = null;
+
+  for (const log of logs) {
+    const current = log.elevation_m;
+    if (current === null) continue;
+    if (previous !== null && current > previous) {
+      gain += current - previous;
+    }
+    previous = current;
+  }
+
+  return gain;
+};
+```
+
+Cloud 5: utpost-ts-douglas-daniil-garen/client/src/lib/tour.tests.ts
+utpost-ts-douglas-daniil-garen/client/src/views/GuidesView.test.ts
+
+```ts
+describe("elevationGain", () => {
+  it("summerar bara stigningar, inte nedförsbackar", () => {
+    expect(elevationGain([log(100), log(150), log(120), log(180)])).toBe(110);
+  });
+});
+```
+
+```ts
+it("visar om sökningen inte matchar någon guide", async () => {
+  const user = userEvent.setup();
+  renderView();
+  await screen.findByText("Kebnekaise");
+
+  await user.type(screen.getByLabelText("Sök"), "fjfjg");
+
+  expect(
+    screen.getByText("Inga guider matchar sökningen."),
+  ).toBeInTheDocument();
+});
+```
 
 Cloud 6:
 
 ### Kvar att förstå
 
+Typer kontrolleras bara vid kompilering. Jag vet inte hur man verifierar att
+API-svaret faktiskt har rätt form vid körning.
 
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 41 – NoSQL och containrar
+
 **Kursmål:** Fullstack 1 · Cloud 4
 
 ### Vad jag förstått
+
 Fullstack 1:
 
 Cloud 4:
 
 ### Var det syns i mitt arbete
+
 Fullstack 1:
 
 Cloud 4:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 42 – GraphQL
+
 **Kursmål:** Fullstack 2
 
 ### Vad jag förstått
+
 Fullstack 2:
 
 ### Var det syns i mitt arbete
+
 Fullstack 2:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 43 – GraphQL i klienten
+
 **Kursmål:** (fri post)
 
 ### Vad jag förstått
 
-
 ### Var det syns i mitt arbete
-
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 44 – Hosting och moln
+
 **Kursmål:** Cloud 1
 
 ### Vad jag förstått
+
 Cloud 1:
 
 ### Var det syns i mitt arbete
+
 Cloud 1:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 45 – Serverless
+
 **Kursmål:** Cloud 2
 
 ### Vad jag förstått
+
 Cloud 2:
 
 ### Var det syns i mitt arbete
+
 Cloud 2:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 46 – OWASP
+
 **Kursmål:** Fullstack 8
 
 ### Vad jag förstått
+
 Fullstack 8:
 
 ### Var det syns i mitt arbete
+
 Fullstack 8:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 47 – Headless CMS
+
 **Kursmål:** Fullstack 9
 
 ### Vad jag förstått
+
 Fullstack 9:
 
 ### Var det syns i mitt arbete
+
 Fullstack 9:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 48 – Rendering, prestanda och struktur
+
 **Kursmål:** Fullstack 6, 7
 
 ### Vad jag förstått
+
 Fullstack 6:
 
 Fullstack 7:
 
 ### Var det syns i mitt arbete
+
 Fullstack 6:
 
 Fullstack 7:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 49 – AI i flödet
+
 **Kursmål:** Fullstack 19
 
 ### Vad jag förstått
+
 Fullstack 19 (bygger på besluten från v. 41, 42, 46 – sammanfatta här med hänvisning till de beslutsdokumenten):
 
 ### Var det syns i mitt arbete
+
 Fullstack 19:
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
 
 ---
 
 ## Vecka 50 – Tekniska motiveringar
+
 **Kursmål:** (fri post)
 
 ### Vad jag förstått
 
-
 ### Var det syns i mitt arbete
-
 
 ### Kvar att förstå
 
-
 ### Siktar på VG
+
 Nej.
