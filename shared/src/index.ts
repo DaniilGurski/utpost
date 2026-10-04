@@ -29,9 +29,13 @@ type Tour = {
   started_at: string;
   distance_m: number;
   notes: string | null;
-  user?: User;
-  guide?: Guide;
-  photos?: Photo[];
+};
+
+type TourEnriched = Tour & {
+  user: User;
+  guide: Guide;
+  photos: Photo[];
+  logs: TourLog[];
 };
 
 type TourLog = {
@@ -54,4 +58,4 @@ type Photo = {
   created_at: string;
 };
 
-export type { Guide, User, Tour, TourLog };
+export type { Guide, User, Tour, TourEnriched, TourLog };
