@@ -1,25 +1,17 @@
-<script setup>
+<script setup lang="ts">
+import type { TourEnriched } from "@utpost/shared";
+import { elevationGain } from "../lib/tours";
 import { watch, ref, computed } from "vue";
 
-const props = defineProps({
-  id: {
-    type: String,
-    default: "",
-  },
-});
+const props = defineProps<{ id: string }>();
 
-const tour = ref(null);
+const tour = ref<TourEnriched | null>(null);
 const loading = ref(false);
 const error = ref("");
 
 const climb = computed(() => {
   if (!tour.value) return;
-
-  return tour.value?.logs.reduce((sum, log, i) => {
-    if (i === 0) return 0;
-    const diff = log.elevation_m - tour.value.logs[i - 1].elevation_m;
-    return diff > 0 ? sum + diff : sum;
-  }, 0);
+  return elevationGain(tour.value.logs);
 });
 
 /*
@@ -40,8 +32,10 @@ const load = async () => {
     const data = await res.json();
     tour.value = data;
   } catch (err) {
-    error.value = err.message;
-    console.log(err);
+    if (err instanceof Error) {
+      error.value = err.message;
+      console.log(err);
+    }
   } finally {
     loading.value = false;
   }
