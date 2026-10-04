@@ -21,7 +21,6 @@ const filteredGuidesCount = computed(() => {
 onMounted(async () => {
   loading.value = true;
   const res = await fetch("http://localhost:4000/api/guides");
-  // const res = await get("/guides");
 
   if (!res.ok) {
     error.value = "Ett fel har inträffat. Försök igen!";
