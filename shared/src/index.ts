@@ -31,6 +31,13 @@ type Tour = {
   notes: string | null;
 };
 
+type TourEnriched = Tour & {
+  user: User;
+  guide: Guide;
+  photos: Photo[];
+  logs: TourLog[];
+};
+
 type TourLog = {
   id: number;
   tour_id: number;
@@ -42,4 +49,20 @@ type TourLog = {
   note: string | null;
 };
 
-export type { Guide, User, Tour, TourLog };
+type Photo = {
+  id: number;
+  tour_id: number;
+  filename: string;
+  width: number;
+  height: number;
+  created_at: string;
+};
+
+// `null` means the request never got an HTTP response (e.g. network error),
+// so every failure must state its status explicitly instead of omitting it.
+type ApiError = {
+  message: string;
+  status: number | null;
+};
+
+export type { Guide, User, Tour, TourEnriched, TourLog, Photo, ApiError };

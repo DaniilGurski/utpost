@@ -1,25 +1,18 @@
-<script setup>
+<script setup lang="ts">
+import type { TourEnriched } from "@utpost/shared";
+import { elevationGain } from "../lib/tours";
+import { get } from "../api";
 import { watch, ref, computed } from "vue";
 
-const props = defineProps({
-  id: {
-    type: String,
-    default: "",
-  },
-});
+const props = defineProps<{ id: string }>();
 
-const tour = ref(null);
+const tour = ref<TourEnriched | null>(null);
 const loading = ref(false);
 const error = ref("");
 
 const climb = computed(() => {
   if (!tour.value) return;
-
-  return tour.value?.logs.reduce((sum, log, i) => {
-    if (i === 0) return 0;
-    const diff = log.elevation_m - tour.value.logs[i - 1].elevation_m;
-    return diff > 0 ? sum + diff : sum;
-  }, 0);
+  return elevationGain(tour.value.logs);
 });
 
 /*
@@ -27,24 +20,19 @@ TODO: Should use `tour` as a prop instead of fetching it.
 This mirrors the original React component `TourDetail` for M1
 */
 const load = async () => {
-  try {
-    loading.value = true;
-    tour.value = null;
-    error.value = "";
-    const res = await fetch(`http://localhost:4000/api/tours/${props.id}`);
+  loading.value = true;
+  tour.value = null;
+  error.value = "";
+  const result = await get<TourEnriched>(`/tours/${props.id}`);
+  loading.value = false;
 
-    if (!res.ok) {
-      throw new Error("Ett fel har inträffad. Försök igen!");
-    }
-
-    const data = await res.json();
-    tour.value = data;
-  } catch (err) {
-    error.value = err.message;
-    console.log(err);
-  } finally {
-    loading.value = false;
+  if (!result.ok) {
+    error.value =
+      result.error.status === 404 ? "Turen finns inte." : result.error.message;
+    return;
   }
+
+  tour.value = result.value;
 };
 
 watch(() => props.id, load, { immediate: true });

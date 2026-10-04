@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
 </script>
 
@@ -13,8 +13,6 @@ import { RouterLink, RouterView } from "vue-router";
     />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
       <nav>
         <RouterLink to="/guides"> Guides </RouterLink>
         <RouterLink to="/tours"> Tours </RouterLink>

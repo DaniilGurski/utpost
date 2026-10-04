@@ -1,26 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
-const tours = ref([]);
+import type { TourEnriched } from "@utpost/shared";
+import { get } from "../api";
+
+const tours = ref<TourEnriched[]>([]);
 const loading = ref(false);
 const error = ref("");
 
 onMounted(async () => {
-  try {
-    loading.value = true;
-    const res = await fetch(`http://localhost:4000/api/tours`);
+  loading.value = true;
+  const result = await get<TourEnriched[]>("/tours");
+  loading.value = false;
 
-    if (!res.ok) {
-      throw new Error("Ett fel har inträffad. Försök igen!");
-    }
-
-    const data = await res.json();
-    tours.value = data;
-  } catch (err) {
-    error.value = err.message;
-    console.log(err);
-  } finally {
-    loading.value = false;
+  if (!result.ok) {
+    error.value = result.error.message;
+    return;
   }
+
+  tours.value = result.value;
 });
 </script>
 
@@ -54,7 +51,7 @@ onMounted(async () => {
         <td>{{ tour.user ? tour.user.display_name : "-" }}</td>
         <td>{{ tour.guide ? tour.guide.title : "-" }}</td>
         <td>{{ Math.round(tour.distance_m / 100) / 10 }}km</td>
-        <td>{{ tour.photos.length }}</td>
+        <td>{{ tour.photos?.length }}</td>
       </tr>
     </tbody>
   </table>
