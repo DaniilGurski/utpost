@@ -29,6 +29,9 @@ type Tour = {
   started_at: string;
   distance_m: number;
   notes: string | null;
+  user?: User;
+  guide?: Guide;
+  photos?: Photo[];
 };
 
 type TourLog = {
@@ -40,6 +43,15 @@ type TourLog = {
   elevation_m: number | null;
   heart_rate: number | null;
   note: string | null;
+};
+
+type Photo = {
+  id: number;
+  tour_id: number;
+  filename: string;
+  width: number;
+  height: number;
+  created_at: string;
 };
 
 export type { Guide, User, Tour, TourLog };
