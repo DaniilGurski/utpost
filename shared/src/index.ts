@@ -60,9 +60,9 @@ type Photo = {
 
 // `null` means the request never got an HTTP response (e.g. network error),
 // so every failure must state its status explicitly instead of omitting it.
-type ApiFailure = {
+type ApiError = {
   message: string;
   status: number | null;
 };
 
-export type { Guide, User, Tour, TourEnriched, TourLog, Photo, ApiFailure };
+export type { Guide, User, Tour, TourEnriched, TourLog, Photo, ApiError };
