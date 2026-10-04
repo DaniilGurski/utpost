@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from "vue";
 import type { Guide } from "@utpost/shared";
 import GuideCard from "../components/GuideCard.vue";
+import { get } from "../api";
 
 const guides = ref<Guide[]>([]);
 const query = ref("");
@@ -20,17 +21,15 @@ const filteredGuidesCount = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  const res = await fetch("http://localhost:4000/api/guides");
+  const result = await get<Guide[]>("/guides");
+  loading.value = false;
 
-  if (!res.ok) {
-    error.value = "Ett fel har inträffat. Försök igen!";
-    loading.value = false;
-    throw new Error("Failed to get guides");
+  if (!result.ok) {
+    error.value = result.error.message;
+    return;
   }
 
-  const data = await res.json();
-  guides.value = data;
-  loading.value = false;
+  guides.value = result.value;
 });
 </script>
 

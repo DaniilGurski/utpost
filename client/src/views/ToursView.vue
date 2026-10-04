@@ -1,30 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import type { TourEnriched } from "@utpost/shared";
+import { get } from "../api";
 
 const tours = ref<TourEnriched[]>([]);
 const loading = ref(false);
 const error = ref("");
 
 onMounted(async () => {
-  try {
-    loading.value = true;
-    const res = await fetch(`http://localhost:4000/api/tours`);
+  loading.value = true;
+  const result = await get<TourEnriched[]>("/tours");
+  loading.value = false;
 
-    if (!res.ok) {
-      throw new Error("Ett fel har inträffad. Försök igen!");
-    }
-
-    const data = await res.json();
-    tours.value = data;
-  } catch (err) {
-    if (err instanceof Error) {
-      error.value = err.message;
-      console.log(err);
-    }
-  } finally {
-    loading.value = false;
+  if (!result.ok) {
+    error.value = result.error.message;
+    return;
   }
+
+  tours.value = result.value;
 });
 </script>
 
