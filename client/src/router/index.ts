@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import GuidesView from "../views/GuidesView.vue";
 import ToursView from "../views/ToursView.vue";
-import TourDetailView from "@/views/TourDetailView.vue";
+import TourDetailView from "../views/TourDetailView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
