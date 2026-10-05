@@ -1,11 +1,12 @@
 import type { AuthResponse, User } from "@utpost/shared";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { post } from "../api";
 import { fail } from "../lib/result";
+import { loadUser, saveUser } from "../lib/session-storage";
 
 export const useSessionStore = defineStore("session", () => {
-  const user = ref<User | null>(null);
+  const user = ref<User | null>(loadUser());
   const token = ref<string | null>(null);
   const loggedIn = computed(() => user.value !== null);
 
@@ -44,5 +45,7 @@ export const useSessionStore = defineStore("session", () => {
     user.value = null;
   };
 
-  return { user, loggedIn, login, register, logout };
+  watch(user, () => saveUser(user.value));
+
+  return { user, token, loggedIn, login, register, logout };
 });
