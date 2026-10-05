@@ -27,11 +27,11 @@ const onSubmit = async () => {
   <form @submit.prevent="onSubmit">
     <label>
       Email
-      <input type="text" v-model="email" />
+      <input v-model="email" type="text" />
     </label>
     <label>
       Password
-      <input type="password" v-model="password" />
+      <input v-model="password" type="password" />
     </label>
 
     <button type="submit">Login</button>
