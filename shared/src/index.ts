@@ -58,6 +58,11 @@ type Photo = {
   created_at: string;
 };
 
+type AuthResponse = {
+  token: string;
+  user: User;
+};
+
 // `null` means the request never got an HTTP response (e.g. network error),
 // so every failure must state its status explicitly instead of omitting it.
 type ApiError = {
@@ -65,4 +70,13 @@ type ApiError = {
   status: number | null;
 };
 
-export type { Guide, User, Tour, TourEnriched, TourLog, Photo, ApiError };
+export type {
+  Guide,
+  User,
+  Tour,
+  TourEnriched,
+  TourLog,
+  Photo,
+  AuthResponse,
+  ApiError,
+};
