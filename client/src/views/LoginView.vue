@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useSessionStore } from "../stores/session";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 const { login } = useSessionStore();
 const router = useRouter();
@@ -11,6 +11,7 @@ const password = ref("");
 const error = ref("");
 
 const onSubmit = async () => {
+  error.value = "";
   const result = await login(email.value, password.value);
 
   if (!result.ok) {
@@ -30,7 +31,7 @@ const onSubmit = async () => {
     </label>
     <label>
       Password
-      <input type="text" v-model="password" />
+      <input type="password" v-model="password" />
     </label>
 
     <button type="submit">Login</button>
