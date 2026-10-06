@@ -4,7 +4,7 @@ import type { TourEnriched } from "@utpost/shared";
 import { get } from "../api";
 
 const tours = ref<TourEnriched[]>([]);
-const loading = ref(false);
+const loading = ref(true);
 const error = ref("");
 
 onMounted(async () => {
