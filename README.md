@@ -4,6 +4,8 @@ Plattform för friluftsdestinationer. Redaktionella guider, användarnas egna tu
 
 ## Kom igång
 
+Kräver Node 22.18+ (eller 24.12+). Node kör TypeScript-filer direkt, så äldre versioner startar inte API:et.
+
 ```bash
 npm install
 docker compose -f docker-compose.dev.yml up -d
@@ -17,6 +19,7 @@ Appen ligger sen på http://localhost:3001 och API:et på http://localhost:4000.
 
 - `api/` – Express + Postgres (Drizzle)
 - `client/` – Vue + Vite, den nya appen på http://localhost:3001. Det är här du jobbar.
+- `shared/` – `@utpost/shared`, delade TypeScript-typer (API-kontraktet) som både `api` och `client` importerar
 - `web/` – React + Vite, den gamla appen som ska översättas till Vue
 
 ## Arbetssätt
@@ -28,7 +31,7 @@ Appen ligger sen på http://localhost:3001 och API:et på http://localhost:4000.
 git commit --allow-empty -m "chore: #<id> init"
 git push origin HEAD          # 2. Skapa sen en draft-PR på GitHub
 # 3. Jobba, committa och pusha ofta
-npm run lint && npm run format:check && npm run test -- --run
+npm run lint && npm run format:check && npm run typecheck && npm run test -- --run
 # 4. Allt grönt? Markera PR:en som ready for review, och merga till main efter review
 ```
 
@@ -46,7 +49,7 @@ Brancher ska vara korta: små PR:er mergas snabbt, så vi får färre konflikter
    - `fix`: buggfix
    - `docs`: dokumentation (markdown)
    - `chore`: organisation och justeringar som inte lägger till något nytt
-6. **Ready for review:** kör lint, `format:check` och testerna (`npm run lint`, `npm run format:check`, `npm run test -- --run`). Fixa allt som är rött innan du markerar PR:en som ready.
+6. **Ready for review:** kör lint, `format:check`, typkontrollen och testerna (`npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test -- --run`). Fixa allt som är rött innan du markerar PR:en som ready.
 
 ### Kommunikation
 
@@ -55,7 +58,7 @@ Brancher ska vara korta: små PR:er mergas snabbt, så vi får färre konflikter
 
 ## Workspaces
 
-Repot är ett npm-workspace med `api`, `web` och `client`. Alla paket delar en `node_modules` och en `package-lock.json` i roten.
+Repot är ett npm-workspace med `api`, `web`, `client` och `shared`. Alla paket delar en `node_modules` och en `package-lock.json` i roten.
 
 - Kör `npm install` bara i roten, aldrig inne i en workspace-mapp. Annars riskerar vi en extra lockfil.
 - Scripten för `client` (lint, test, format) körs direkt från roten, du behöver inte ange workspace.
@@ -70,6 +73,14 @@ Repot är ett npm-workspace med `api`, `web` och `client`. Alla paket delar en `
 npm run lint        # hitta problem
 npm run lint:fix    # fixa det som går automatiskt
 ```
+
+### Typkontroll (TypeScript)
+
+```bash
+npm run typecheck    # vue-tsc i client/ och tsc i api/
+```
+
+Körs även i CI (jobbet `Kvalitet`), så typfel stoppar PR:en.
 
 ### Tester (Vitest)
 
