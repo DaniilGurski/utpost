@@ -53,4 +53,13 @@ describe("ToursView", () => {
       "3",
     ]);
   });
+
+  it("shows 'Inga turer' when the list is empty", async () => {
+    respondWith([]);
+    renderView();
+
+    expect(await screen.findByText("Inga turer")).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
+  });
 });
