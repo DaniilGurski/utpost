@@ -14,14 +14,14 @@ const log = (elevation_m: number | null, id = 0): TourLog => ({
 });
 
 describe("elevationGain", () => {
-  it("summerar bara stigningar, inte nedförsbackar", () => {
+  it("sums only climbs, not descents", () => {
     expect(elevationGain([log(100), log(150), log(120), log(180)])).toBe(110);
   });
-  it("ger 0 för en tur utan mätpunkter", () => {
+  it("gives 0 for an empty tour", () => {
     expect(elevationGain([])).toBe(0);
   });
-  // Regressionstest – skuld ur docs/debt.md: en mätpunkt utan höjd räknas som havsnivå
-  it("hoppar över mätpunkter utan höjd i stället för att räkna dem som noll", () => {
+  // Regression test: a measurement point without elevation is skipped, not counted as 0
+  it("skips measurement points without elevation instead of counting 0", () => {
     expect(elevationGain([log(100), log(null), log(150)])).toBe(50);
   });
 });
