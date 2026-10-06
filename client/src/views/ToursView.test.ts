@@ -62,4 +62,13 @@ describe("ToursView", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
   });
+
+  it("shows the error message when the API fails", async () => {
+    respondWith({ message: "Databasen är nere" }, 500);
+    renderView();
+
+    expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
+    expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
+    expect(screen.queryByText("Inga turer")).not.toBeInTheDocument();
+  });
 });
