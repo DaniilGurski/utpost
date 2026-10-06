@@ -53,4 +53,13 @@ describe("TourDetailView", () => {
       await screen.findByText("12.3 km · 4 mätpunkter · 130 höjdmeter"),
     ).toBeInTheDocument();
   });
+
+  it("shows the error message when the API fails", async () => {
+    respondWith({ message: "Databasen är nere" }, 500);
+    renderView();
+
+    expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
+    expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+  });
 });
