@@ -1,10 +1,10 @@
 # Kunskapslog
 
-| Kursmål               | Post i vecka | Var det syns i mitt arbete                             | Siktar på VG |
-| --------------------- | ------------ | ------------------------------------------------------ | ------------ |
-| Fullstack 4           | V38          | PR #16, `README.md`, `.github/`                        | -            |
-| Fullstack 5 · Cloud 3 | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml` | -            |
-| Fullstack 3 · Cloud 5, 6 | V40 | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | - |
+| Kursmål                  | Post i vecka | Var det syns i mitt arbete                                                  | Siktar på VG |
+| ------------------------ | ------------ | --------------------------------------------------------------------------- | ------------ |
+| Fullstack 4              | V38          | PR #16, `README.md`, `.github/`                                             | -            |
+| Fullstack 5 · Cloud 3    | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml`                      | -            |
+| Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -69,6 +69,10 @@ Fullstack 3:
 
 - Hur man skapar en Pinia store för en user session
 - Hur man skyddar routes med beforeEach med Vue Router
+
+Cloud 5-6:
+
+- Hur man förbättrar en pipeline med en typecheck script.
 
 ### Var det syns i mitt arbete
 
