@@ -4,6 +4,7 @@
 | --------------------- | ------------ | ------------------------------------------------------ | ------------ |
 | Fullstack 4           | V38          | PR #16, `README.md`, `.github/`                        | -            |
 | Fullstack 5 · Cloud 3 | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml` | -            |
+| Fullstack 3 · Cloud 5, 6 | V40 | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | - |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -53,6 +54,30 @@ Cloud 5: `.github/workflows/ci.yml`, `docs/pipeline.md`
 ### Kvar att förstå
 
 Använda Pinia i praktiken
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 40 – TypeScript och kvalitetssäkring
+
+**Kursmål:** Fullstack 3 · Cloud 5, 6
+
+### Vad jag förstått
+
+Fullstack 3:
+
+- Hur man skapar en Pinia store för en user session
+- Hur man skyddar routes med beforeEach med Vue Router
+
+### Var det syns i mitt arbete
+
+Fullstack 3: PR #68 (Pinia store, route guards), PR #48 (`shared/`)
+Cloud 5, 6: `docs/testing.md` (PR #74), typecheck-steget i `.github/workflows/ci.yml` (PR #60, inte av mig)
+
+### Kvar att förstå
+
+Fortfarande behöver bättre förstå hur man gör TDD i praktiken, hur man skriver komponenttester
 
 ### Siktar på VG
 
