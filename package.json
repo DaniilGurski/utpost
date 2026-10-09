@@ -16,6 +16,7 @@
     "lint": "npm run lint -w client",
     "format:check": "npm run format:check -w client",
     "format:write": "npm run format:write -w client",
+    "mongo:smoke": "npm run mongo:smoke -w api",
     "test": "npm run test -w client",
     "build": "npm run build -w client",
     "seed": "npm run seed -w api",
@@ -25,5 +26,4 @@
     "concurrently": "^9.1.2",
     "typescript": "~6.0.0"
   }
-  
 }

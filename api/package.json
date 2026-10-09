@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/index.js",
+    "dev": "node --watch --env-file=../.env src/index.js ",
     "start": "node src/index.js",
     "seed": "node src/db/seed.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "mongo:smoke": "node --env-file=../.env src/db/mongo-smoke.js"
   },
   "dependencies": {
     "@utpost/shared": "^0.0.0",
@@ -15,6 +16,7 @@
     "drizzle-orm": "^0.36.4",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.7.0",
     "pg": "^8.13.1"
   },
   "devDependencies": {
