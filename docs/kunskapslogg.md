@@ -165,17 +165,21 @@ Nej.
 
 ### Vad jag förstått
 
-Fullstack 1:
+Fullstack 1: Ett MongoDB-dokument är ett JSON-liknande objekt (lagrat som BSON) som kan innehålla objekt och arrayer, till skillnad från Postgres där man använder tabeller och rader. Användare refereras med user_id, där många turer kan peka på samma användare och användaren ändras separat. Bucket pattern används om ett dokument riskerar nå gränsen på 16 MB.
 
-Cloud 4:
+Cloud 4: Skapade en Dockerfile för klienten. Den byggs i roten av repot för att package-lock ligger där. Installeras med npm ci som läser package-lock.json, så alla i teamet får samma versioner. Jag har en lokal .dockerignore med **/node_modules som inte
+committas, annars skriver min Windows-node_modules över de paket som installerades i Docker-containern. Porten 4173 i containern kopplas till port 5173 på min dator.
 
 ### Var det syns i mitt arbete
 
-Fullstack 1:
+Fullstack 1: docs/decisions/databas.md
 
-Cloud 4:
+Cloud 4: client/Dockerfile
 
 ### Kvar att förstå
+
+Multi-stage-bygge, som ska göra imagen mindre. Hur Compose använder
+Dockerfilerna tillsammans med healthchecks.
 
 ### Siktar på VG
 
