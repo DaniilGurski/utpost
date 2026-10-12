@@ -165,7 +165,7 @@ Nej.
 
 ### Vad jag förstått
 
-Fullstack 1: Ett MongoDB-dokument är ett JSON-liknande objekt (lagrat som BSON) som kan innehålla objekt och arrayer, till skillnad från Postgres där man använder tabeller och rader. Användare refereras med user_id, där många turer kan peka på samma användare och användaren ändras separat. Bucket pattern används om ett dokument riskerar nå gränsen på 16 MB.
+Fullstack 1: Ett MongoDB-dokument är ett JSON-liknande objekt (lagrat som BSON) som kan innehålla nästlade objekt och arrayer, till skillnad från Postgres där man använder tabeller och rader. För turer används nu MongoDB (kan ändras senare) och för users och Guides Postgres då dessa delas av flera turer och refereras. För en tur i Mongo bäddas mätpunkter in i samma dokument och läses därför snabbare än via referens, eftersom hela turen med dess data läses på samma gång. "Bucket pattern" används om ett dokument riskerar nå gränsen på 16 MB.
 
 Cloud 4: Skapade en Dockerfile för klienten. Den byggs i roten av repot för att package-lock ligger där. Installeras med npm ci som läser package-lock.json, så alla i teamet får samma versioner. Jag har en lokal .dockerignore med **/node_modules som inte
 committas, annars skriver min Windows-node_modules över de paket som installerades i Docker-containern. Porten 4173 i containern kopplas till port 5173 på min dator.
