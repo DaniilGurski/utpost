@@ -4,16 +4,45 @@ Plattform för friluftsdestinationer. Redaktionella guider, användarnas egna tu
 
 ## Kom igång
 
-Kräver Node 22.18+ (eller 24.12+). Node kör TypeScript-filer direkt, så äldre versioner startar inte API:et.
+Kopiera först `.env.example` till `.env` och fyll i egna användarnamn och lösenord. `.env` committas aldrig.
 
 ```bash
-npm install
-docker compose -f docker-compose.dev.yml up -d
-npm run seed
-npm start
+cp .env.example .env
 ```
 
-Appen ligger sen på http://localhost:3001 och API:et på http://localhost:4000.
+Det finns två sätt att köra Utpost. Båda använder samma compose-fil (`docker-compose.yml`).
+
+### 1. Allt i Docker
+
+Kräver bara Docker. Klienten, API:et, Postgres och MongoDB startar med ett kommando:
+
+```bash
+docker compose up --build
+docker compose exec api npm run seed   # i en annan terminal, fyller databasen
+```
+
+Kör alltid med `--build` efter ändringar i en Dockerfile eller i koden, annars körs en gammal image.
+
+### 2. Databaserna i Docker, koden lokalt
+
+Bra när du utvecklar och vill ha hot reload. Kräver Node lokalt (samma version som i Dockerfilerna, `node:22`).
+
+```bash
+docker compose up -d postgres mongo
+npm install
+
+# .env pekar på tjänstnamnen (postgres:5432, mongo:27017), som bara finns inne i Docker-nätverket.
+# Utanför Docker går vi via de publicerade portarna i stället:
+export DATABASE_URL="postgres://<user>:<lösenord>@localhost:5433/utpost"
+export MONGO_URL="mongodb://<user>:<lösenord>@localhost:27017/?authSource=admin"
+
+npm run seed
+npm run dev
+```
+
+Postgres är publicerad på 5433 (inte 5432) för att inte krocka med en lokalt installerad Postgres.
+
+I båda fallen ligger appen på http://localhost:3001 och API:et på http://localhost:4000.
 
 ## Struktur
 
