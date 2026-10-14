@@ -5,6 +5,7 @@
 | Fullstack 4              | V38          | PR #16, `README.md`, `.github/`                                             | -            |
 | Fullstack 5 · Cloud 3    | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml`                      | -            |
 | Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | -            |
+| Fullstack 1 · Cloud 4    | V41          | PR #83, PR #87 `docs/database.md`, PR #90 `README.md`, PR #92               | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -82,6 +83,38 @@ Cloud 5, 6: `docs/testing.md` (PR #74), typecheck-steget i `.github/workflows/ci
 ### Kvar att förstå
 
 Fortfarande behöver bättre förstå hur man gör TDD i praktiken, hur man skriver komponenttester
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 41 – NoSQL och containrar
+
+**Kursmål:** Fullstack 1 · Cloud 4
+
+### Vad jag förstått
+
+Fullstack 1:
+
+- Fördelar och nackdelar med MongoDB jämfört med Postgres
+- Inbäddade och refererade dokumentmodeller
+- Gränsen på 16 MB per dokument, och bucket-mönstret för att hantera stora dokument
+- Hur man kopplar Mongo till en Express-server
+
+Cloud 4:
+
+- Compose-tjänster, healthchecks och `depends_on` med `service_healthy`
+- Tjänstnamn i Docker-nätverket (`postgres:5432`) jämfört med localhost från värden (`localhost:5433`)
+- Namngivna volymer
+
+### Var det syns i mitt arbete
+
+Fullstack 1: PR #83 (`api/src/db/mongo.js`, health check, `mongo:smoke`), PR #87 (`docs/database.md`)
+Cloud 4: PR #83 (Mongo-tjänsten i compose), PR #90 (`README.md`), PR #92 (databasadresser i compose)
+
+### Kvar att förstå
+
+Hur Docker-nätverk fungerar mer i detalj.
 
 ### Siktar på VG
 
