@@ -7,8 +7,11 @@ import { authRouter } from "./routes/auth.js";
 import { guidesRouter } from "./routes/guides.ts";
 import { toursRouter } from "./routes/tours.js";
 import { photosRouter } from "./routes/photos.js";
+import { yoga } from "./graphql/server.js";
 
 const app = express();
+
+app.use(yoga.graphqlEndpoint, yoga);
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
@@ -32,7 +35,8 @@ app.use("/api/tours", toursRouter);
 app.use("/api/photos", photosRouter);
 
 app.listen(config.port, () => {
-  console.log(`API lyssnar på http://localhost:${config.port}`);
+  console.log(`REST listening: http://localhost:${config.port}`);
+  console.log(`GraphQL listening: http://localhost:${config.port}/graphql`);
 });
 
 // Servern dog i produktion en fredag när någon skrev in ett ogiltigt id.
