@@ -1,3 +1,4 @@
+import { getOperationAST } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { queryLog } from "../db/client.js";
 import { schema } from "./schema.js";
@@ -12,7 +13,7 @@ const logQueryCount = {
     const start = performance.now();
     return {
       onExecuteDone() {
-        const name = args.operationName ?? "anonym";
+        const name = getOperationAST(args.document, args.operationName)?.name?.value ?? "anonym";
         const ms = Math.round(performance.now() - start);
         console.log(`[graphql] ${name}: ${log.count - before} databasfrågor, ${ms} ms`);
       },
