@@ -7,11 +7,11 @@ import { authRouter } from "./routes/auth.js";
 import { guidesRouter } from "./routes/guides.ts";
 import { toursRouter } from "./routes/tours.js";
 import { photosRouter } from "./routes/photos.js";
-import { yoga } from "./graphql/server.js";
+import { yoga, trackQueries } from "./graphql/server.js";
 
 const app = express();
 
-app.use(yoga.graphqlEndpoint, yoga);
+app.use(yoga.graphqlEndpoint, trackQueries, yoga);
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
