@@ -1,12 +1,11 @@
-FROM node:22-alpine
+# Steg 1 – build: Node och alla node_modules, bara för att köra vite build.
+FROM node:22-alpine as build
 WORKDIR /app
 
 # Paketfiler först, så att npm ci-lagret cachas
 COPY package.json package-lock.json ./
-COPY api/package.json api/
-COPY web/package.json web/
-COPY client/package.json client/
 COPY shared/package.json shared/
+COPY client/package.json client/
 RUN npm ci --workspace=client
 
 # Koden efter
@@ -16,6 +15,10 @@ COPY shared/ shared/
 # Bygg till client/dist
 RUN npm run build --workspace=client
 
-WORKDIR /app/client
-EXPOSE 4173
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
+# Steg 2 – det som blir imagen: nginx och de färdiga filerna. Inget Node, inga node_modules,
+# ingen källkod. Allt från steg 1 som inte kopieras hit kastas.
+FROM nginx:1.27-alpine
+COPY client/ngnix.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/client/dist /usr/share/nginx/html
+
+EXPOSE 80
