@@ -1,7 +1,7 @@
 import type { ApiError } from "@utpost/shared";
 import { success, fail, type Result } from "./lib/result";
 
-export const API_URL = "http://localhost:4000/api";
+export const API_URL = "/api";
 
 const NETWORK_ERROR = "Kunde inte nå servern. Försök igen!";
 const GENERIC_ERROR = "Ett fel har inträffat. Försök igen!";
