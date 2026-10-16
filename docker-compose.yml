@@ -42,15 +42,13 @@ services:
         condition: service_healthy
       mongo:
         condition: service_healthy
-    ports:
-      - "4000:4000"
 
   client:
     build:
       context: .
       dockerfile: client/Dockerfile
     ports:
-      - "3001:4173"
+      - "3001:80"
 
 volumes:
   utpost_pgdata:
