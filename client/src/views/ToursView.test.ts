@@ -1,4 +1,3 @@
-import type { Photo, TourEnriched, User, Guide } from "@utpost/shared";
 import { cleanup, render, screen, within } from "@testing-library/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ToursView from "./ToursView.vue";
@@ -6,21 +5,13 @@ import ToursView from "./ToursView.vue";
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
-const makeTour = (
-  title: string,
-  overrides: Partial<TourEnriched> = {},
-): TourEnriched => ({
-  id: 1,
-  user_id: 1,
-  guide_id: 1,
+const makeTour = (title: string, overrides = {}) => ({
+  id: "1",
   title,
-  started_at: "",
-  distance_m: 12345,
-  notes: null,
-  user: { id: 1, display_name: "Anna" } as User,
-  guide: { id: 1, title: "Kungsleden" } as Guide,
-  photos: [{ id: 1 }, { id: 2 }, { id: 3 }] as Photo[],
-  logs: [],
+  distanceM: 12345,
+  user: { displayName: "Anna" },
+  guide: { title: "Kungsleden" },
+  photos: [{ id: "1" }, { id: "2" }, { id: "3" }],
   ...overrides,
 });
 
@@ -39,7 +30,7 @@ afterEach(() => {
 
 describe("ToursView", () => {
   it("shows tour, user, guide, length and image count in the table when data arrives", async () => {
-    respondWith([makeTour("Morgontur")]);
+    respondWith({ data: { tours: [makeTour("Morgontur")] } });
     renderView();
 
     const row = (await screen.findByText("Morgontur")).closest("tr")!;
@@ -55,7 +46,7 @@ describe("ToursView", () => {
   });
 
   it("shows 'Inga turer' when the list is empty", async () => {
-    respondWith([]);
+    respondWith({ data: { tours: [] } });
     renderView();
 
     expect(await screen.findByText("Inga turer")).toBeInTheDocument();
@@ -64,7 +55,7 @@ describe("ToursView", () => {
   });
 
   it("shows the error message when the API fails", async () => {
-    respondWith({ message: "Databasen är nere" }, 500);
+    respondWith({ errors: [{ message: "Databasen är nere" }] });
     renderView();
 
     expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();

@@ -1,23 +1,50 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { TourEnriched } from "@utpost/shared";
-import { get } from "../api";
+import { gql } from "../graphql";
 
-const tours = ref<TourEnriched[]>([]);
+type ToursData = {
+  tours: {
+    id: string;
+    title: string;
+    distanceM: number;
+    user: { displayName: string };
+    guide: { title: string } | null;
+    photos: { id: string }[];
+  }[];
+};
+
+const QUERY = /* GraphQL */ `
+  query Turer {
+    tours(limit: 50) {
+      id
+      title
+      distanceM
+      user {
+        displayName
+      }
+      guide {
+        title
+      }
+      photos {
+        id
+      }
+    }
+  }
+`;
+
+const tours = ref<ToursData["tours"]>([]);
 const loading = ref(true);
 const error = ref("");
 
 onMounted(async () => {
-  loading.value = true;
-  const result = await get<TourEnriched[]>("/tours");
-  loading.value = false;
-
-  if (!result.ok) {
-    error.value = result.error.message;
-    return;
+  try {
+    const data = await gql<ToursData>(QUERY);
+    tours.value = data.tours;
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : "Något gick fel";
+  } finally {
+    loading.value = false;
   }
-
-  tours.value = result.value;
 });
 </script>
 
@@ -48,10 +75,10 @@ onMounted(async () => {
             {{ tour.title }}
           </RouterLink>
         </td>
-        <td>{{ tour.user ? tour.user.display_name : "-" }}</td>
+        <td>{{ tour.user.displayName }}</td>
         <td>{{ tour.guide ? tour.guide.title : "-" }}</td>
-        <td>{{ Math.round(tour.distance_m / 100) / 10 }}km</td>
-        <td>{{ tour.photos?.length }}</td>
+        <td>{{ Math.round(tour.distanceM / 100) / 10 }}km</td>
+        <td>{{ tour.photos.length }}</td>
       </tr>
     </tbody>
   </table>
