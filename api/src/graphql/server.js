@@ -2,6 +2,7 @@ import { getOperationAST } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { queryLog } from "../db/client.js";
 import { schema } from "./schema.js";
+import { verifyAuthHeader } from "../lib/auth.js";
 
 // Skriver ut antalet databasfrågor per GraphQL-operation, t.ex.
 // "[graphql] Tours: 151 databasfrågor, 87 ms". Underlag för beslutsdokumentet.
@@ -13,9 +14,13 @@ const logQueryCount = {
     const start = performance.now();
     return {
       onExecuteDone() {
-        const name = getOperationAST(args.document, args.operationName)?.name?.value ?? "anonym";
+        const name =
+          getOperationAST(args.document, args.operationName)?.name?.value ??
+          "anonym";
         const ms = Math.round(performance.now() - start);
-        console.log(`[graphql] ${name}: ${log.count - before} databasfrågor, ${ms} ms`);
+        console.log(
+          `[graphql] ${name}: ${log.count - before} databasfrågor, ${ms} ms`,
+        );
       },
     };
   },
@@ -26,6 +31,12 @@ export const yoga = createYoga({
   plugins: [logQueryCount],
 
   graphqlEndpoint: "/graphql",
+  context: ({ request }) => {
+    return {
+      user: verifyAuthHeader(request.headers.get("authorization")),
+    };
+  },
 });
 
-export const trackQueries = (req, res, next) => queryLog.run({ count: 0 }, next);
+export const trackQueries = (req, res, next) =>
+  queryLog.run({ count: 0 }, next);

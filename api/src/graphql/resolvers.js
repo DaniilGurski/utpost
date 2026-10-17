@@ -7,6 +7,7 @@ import {
 } from "../data/tours.js";
 import { listGuides, getGuideById, getGuideBySlug } from "../data/guides.js";
 import { getUserById } from "../data/users.js";
+import { GraphQLError } from "graphql/error";
 
 const MAX_TOURS = 200;
 
@@ -55,9 +56,14 @@ export const resolvers = {
   },
 
   Mutation: {
-    createTour: async (_, args) => {
-      const tour = await createTour(args.tour);
-      return tour;
+    createTour: (_, args, ctx) => {
+      if (!ctx.user)
+        throw new GraphQLError("Not authenticated", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+
+      console.log(ctx.user.id);
+      return createTour({ ...args.tour, userId: ctx.user.id });
     },
   },
 };
