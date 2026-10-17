@@ -1,6 +1,13 @@
-import { listTours, getTour, getTourLogs, getTourPhotos } from "../data/tours.js";
+import {
+  listTours,
+  getTour,
+  getTourLogs,
+  getTourPhotos,
+  createTour,
+} from "../data/tours.js";
 import { listGuides, getGuideById, getGuideBySlug } from "../data/guides.js";
 import { getUserById } from "../data/users.js";
+import { GraphQLError } from "graphql/error";
 
 const MAX_TOURS = 200;
 
@@ -46,5 +53,16 @@ export const resolvers = {
   Tour: {
     ...tourFields,
     logs: (tour) => getTourLogs(tour.id),
+  },
+
+  Mutation: {
+    createTour: (_, args, ctx) => {
+      if (!ctx.user)
+        throw new GraphQLError("Not authenticated", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+
+      return createTour({ ...args.tour, userId: ctx.user.id });
+    },
   },
 };

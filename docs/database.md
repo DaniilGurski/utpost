@@ -100,7 +100,7 @@ Inget index på `user_id` eller `guide_id` än: ingen skärm frågar efter "alla
    - summan av `photos.length` = antal rader i `photos` (248)
    - stickprov på tre turer, varav en utan guide, där punkterna jämförs en och en
 4. **Byt källa.** `/api/tours` byter källa till Mongo via `TOURS_SOURCE=postgres|mongo` med `mongo` som standard. Listan använder projektionen, detaljen hela dokumentet.
-5. **Skrivvägar.** `POST /tours`, `DELETE /tours/:id` och fotouppladdning skriver bara till Mongo. Mongo är den enda skrivande källan, så vi har ingen dubbelskrivning och inget synkproblem.
+5. **Skrivvägar.** `POST /tours`, GraphQL-mutationen `createTour`, `DELETE /tours/:id` och fotouppladdning skriver bara till Mongo. `POST /tours` och `createTour` går genom samma `createTour` i `api/src/data/tours.js`, så när den byter källa följer båda med. Mongo är den enda skrivande källan, så vi har ingen dubbelskrivning och inget synkproblem.
 6. **`tour_logs` och de andra turtabellerna efteråt.** De behålls men fryses: ingen kod skriver till dem. Vi tar inte bort dem, eftersom det är osäkert om vi använder MongoDB på sikt.
 7. **Reträtt.** Sätt `TOURS_SOURCE=postgres` för att läsa från de frysta tabellerna igen. Det ger de data som fanns vid frysningen. Det som skrivits i Mongo efter bytet följer inte med, så för en riktig reträtt skriver vi ett omvänt skript (Mongo → Postgres). Det skriptet är vår utgångsplan om vi byter bort Mongo.
 

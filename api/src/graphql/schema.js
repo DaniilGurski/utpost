@@ -63,6 +63,18 @@ export const typeDefs = /* GraphQL */ `
     tours(limit: Int = 50): [TourSummary!]!
     tour(id: ID!): Tour
   }
+
+  input CreateTourInput {
+    guideId: ID
+    title: String!
+    startedAt: String!
+    distanceM: Int!
+    notes: String
+  }
+
+  type Mutation {
+    createTour(tour: CreateTourInput!): Tour!
+  }
 `;
 
 export const schema = createSchema({ typeDefs, resolvers });
