@@ -1,4 +1,10 @@
-import { listTours, getTour, getTourLogs, getTourPhotos } from "../data/tours.js";
+import {
+  listTours,
+  getTour,
+  getTourLogs,
+  getTourPhotos,
+  createTour,
+} from "../data/tours.js";
 import { listGuides, getGuideById, getGuideBySlug } from "../data/guides.js";
 import { getUserById } from "../data/users.js";
 
@@ -46,5 +52,12 @@ export const resolvers = {
   Tour: {
     ...tourFields,
     logs: (tour) => getTourLogs(tour.id),
+  },
+
+  Mutation: {
+    createTour: async (_, args) => {
+      const tour = await createTour(args.tour);
+      return tour;
+    },
   },
 };
