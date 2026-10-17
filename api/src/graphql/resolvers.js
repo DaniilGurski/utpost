@@ -62,7 +62,6 @@ export const resolvers = {
           extensions: { code: "UNAUTHENTICATED" },
         });
 
-      console.log(ctx.user.id);
       return createTour({ ...args.tour, userId: ctx.user.id });
     },
   },

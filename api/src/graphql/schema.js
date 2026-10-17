@@ -65,7 +65,6 @@ export const typeDefs = /* GraphQL */ `
   }
 
   input CreateTourInput {
-    userId: ID!
     guideId: ID
     title: String!
     startedAt: String!
