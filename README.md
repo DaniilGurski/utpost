@@ -23,6 +23,13 @@ docker compose exec api npm run seed   # i en annan terminal, fyller databasen
 
 Kör alltid med `--build` efter ändringar i en Dockerfile eller i koden, annars körs en gammal image.
 
+Client-imagen byggs i två steg (multi-stage): `node:22-alpine` bygger klienten och `nginx:1.27-alpine` serverar `dist/`. Nginx skickar också `/api/` och `/graphql` vidare till API:et.
+
+| Client-image                                      | Storlek (`docker image ls`, DISK USAGE) |
+| ------------------------------------------------- | --------------------------------------- |
+| Före: ett steg, `node:22-alpine` + `vite preview` | 626 MB                                  |
+| Efter: multi-stage, `nginx:1.27-alpine`           | 73,8 MB                                 |
+
 ### 2. Databaserna i Docker, koden lokalt
 
 Bra när du utvecklar och vill ha hot reload. Kräver Node lokalt (samma version som i Dockerfilerna, `node:22`).
@@ -43,6 +50,31 @@ npm run dev
 Postgres är publicerad på 5433 (inte 5432) för att inte krocka med en lokalt installerad Postgres.
 
 I båda fallen ligger appen på http://localhost:3001 och API:et på http://localhost:4000.
+
+### Skapa en testanvändare
+
+Registrera en användare direkt mot API:et. Svaret innehåller en JWT (`token`) och användaren.
+
+```bash
+curl -X POST http://localhost:4000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test1234", "displayName": "Test User"}'
+```
+
+För att använda token i anrop mot GraphQL (kräver `jq`):
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test1234", "displayName": "Test User"}' | jq -r .token)
+
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"query": "{ __typename }"}'
+```
+
+Använd en ny e-postadress varje gång, registreringen saknar felhantering för dubbletter. Om användaren redan finns: logga in med `POST /api/auth/login` (`email` + `password`).
 
 ## Struktur
 
