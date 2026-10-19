@@ -193,13 +193,19 @@ Nej.
 
 ### Vad jag förstått
 
-Fullstack 2:
+Fullstack 2: Typer för GraphQL använder skalärer (int, float) och ett utropstecken för not null, värden som måste finnas. Schema definierar vad som kan tas emot av ett api. En query skickas från klienten med vad som efterfrågas och behöver matcha schemat.Typerna bestäms därmed av datan som backend (eller vad man testar mot) returnerar.
+
+ToursView skickar nu bara en fråga via gql() och ber bara om fält tabellen visar. Typen ToursData skrevs för hand så att ts vet formen på svaret. Testerna för ToursView ändrades för att matcha vad mock api svarar med, med tydliga errors även vid 200-svar.
 
 ### Var det syns i mitt arbete
 
-Fullstack 2:
+Fullstack 2: api/src/graphql/schema.js
+client/src/views/ToursView.vue
+client/src/views/ToursView.test.ts
 
 ### Kvar att förstå
+
+N+1: varje tur kostar extra databasfrågor för användare, guide och foton. Det ska lösas senare i kursen. Hur codegen ersätter handskrivna typer i M5.
 
 ### Siktar på VG
 
