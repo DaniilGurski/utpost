@@ -44,6 +44,31 @@ Postgres är publicerad på 5433 (inte 5432) för att inte krocka med en lokalt 
 
 I båda fallen ligger appen på http://localhost:3001 och API:et på http://localhost:4000.
 
+### Skapa en testanvändare
+
+Registrera en användare direkt mot API:et. Svaret innehåller en JWT (`token`) och användaren.
+
+```bash
+curl -X POST http://localhost:4000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test1234", "displayName": "Test User"}'
+```
+
+För att använda token i anrop mot GraphQL (kräver `jq`):
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test1234", "displayName": "Test User"}' | jq -r .token)
+
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"query": "{ __typename }"}'
+```
+
+Använd en ny e-postadress varje gång, registreringen saknar felhantering för dubbletter. Om användaren redan finns: logga in med `POST /api/auth/login` (`email` + `password`).
+
 ## Struktur
 
 - `api/` – Express + Postgres (Drizzle)
