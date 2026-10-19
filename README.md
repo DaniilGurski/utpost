@@ -23,6 +23,13 @@ docker compose exec api npm run seed   # i en annan terminal, fyller databasen
 
 Kör alltid med `--build` efter ändringar i en Dockerfile eller i koden, annars körs en gammal image.
 
+Client-imagen byggs i två steg (multi-stage): `node:22-alpine` bygger klienten och `nginx:1.27-alpine` serverar `dist/`. Nginx skickar också `/api/` och `/graphql` vidare till API:et.
+
+| Client-image                                      | Storlek (`docker image ls`, DISK USAGE) |
+| ------------------------------------------------- | --------------------------------------- |
+| Före: ett steg, `node:22-alpine` + `vite preview` | 626 MB                                  |
+| Efter: multi-stage, `nginx:1.27-alpine`           | 73,8 MB                                 |
+
 ### 2. Databaserna i Docker, koden lokalt
 
 Bra när du utvecklar och vill ha hot reload. Kräver Node lokalt (samma version som i Dockerfilerna, `node:22`).
