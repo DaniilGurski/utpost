@@ -54,7 +54,7 @@ Nej.
 
 ### Vad jag förstått
 
-Fullstack 5: Fokus för mig låg helt på Cloud/CI denna vecka.
+Fullstack 5: Fokus för mig låg helt på Cloud/CI denna vecka gällande teamrepot.
 
 Cloud 3: Sätta upp en yaml-fil för CI workflow med korrekt indentering och syntax. Den triggas av en PR/push och körs i ordning på tom maskin. Lärde mig att en required status check måste matcha jobbnamnet exakt i rulesetet.
 Pipelinen failade första gången ("No test files found") — löste genom ett enkelt fristående test under client.
