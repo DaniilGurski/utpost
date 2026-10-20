@@ -6,6 +6,7 @@
 | Fullstack 5 · Cloud 3    | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml`                      | -            |
 | Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | -            |
 | Fullstack 1 · Cloud 4    | V41          | PR #83, PR #87 `docs/database.md`, PR #90 `README.md`, PR #92               | -            |
+| Fullstack 2              | V42          | PR #97, PR #99, PR #111, PR #114 `docs/decisions/api-stil.md`               | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -21,7 +22,7 @@ Fullstack 4:
 
 ### Var det syns i mitt arbete
 
-Fullstack 1: PR #14 (inte Vue kod, får inte merga kod i M0)
+Fullstack 4: PR #14 (inte Vue kod, får inte merga kod i M0)
 
 ### Kvar att förstå
 
@@ -37,11 +38,11 @@ Nej.
 
 ### Vad jag förstått
 
-Fullstack 4:
+Fullstack 5:
 
 - State management med Pinia
 
-Cloud 5:
+Cloud 3:
 
 - Vad är CI or varför det finns
 - Skapa GitHub actions och Rulesets
@@ -49,8 +50,8 @@ Cloud 5:
 
 ### Var det syns i mitt arbete
 
-Fullstack 4: Har inte använd Pinia än.
-Cloud 5: `.github/workflows/ci.yml`, `docs/pipeline.md`
+Fullstack 5: Har inte använd Pinia än.
+Cloud 3: `.github/workflows/ci.yml`, `docs/pipeline.md`
 
 ### Kvar att förstå
 
@@ -115,6 +116,32 @@ Cloud 4: PR #83 (Mongo-tjänsten i compose), PR #90 (`README.md`), PR #92 (datab
 ### Kvar att förstå
 
 Hur Docker-nätverk fungerar mer i detalj.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 42 – GraphQL
+
+**Kursmål:** Fullstack 2
+
+### Vad jag förstått
+
+Fullstack 2:
+
+- Designa schemat (SDL) utifrån vyerna, inte tabellerna
+- Fältresolvers som översätter från kolumnnamn (`length_km` → `lengthKm`)
+- N+1-problemet och hur man mäter det (antal databasfrågor per operation i loggen)
+- Mutation med en input-typ, och JWT i `context` (`UNAUTHENTICATED` utan token)
+- När GraphQL ersätter REST och när det kompletterar
+
+### Var det syns i mitt arbete
+
+Fullstack 2: PR #97 (grund), PR #99 (resolvers, N+1-loggning), PR #111 (mutation, auth), PR #114 (`docs/decisions/api-stil.md`)
+
+### Kvar att förstå
+
+Hur man löser N+1 i praktiken (DataLoader) och hur cache fungerar med GraphQL.
 
 ### Siktar på VG
 
