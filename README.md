@@ -170,6 +170,29 @@ Vi använder **trunk-based development med pull requests**. Strategin är ny fö
 - Varför: det tar bort ett lager av komplexitet, vilket passar ett litet team på 4 personer. Genom att merga oftare undviker vi också konflikter och synkroniseringsproblem mellan brancherna.
 - Vi använder ändå PR:er (även som drafts) så att teamet kan följa en features framsteg under dagen.
 
+## Mätning före/efter (M5)
+
+```graphql
+query TourList {
+  tours {
+    id
+    title
+    distanceM
+    user {
+      displayName
+    }
+    guide {
+      title
+    }
+    photos {
+      id
+    }
+  }
+}
+```
+
+Before: [graphql] TourList: 136 databasfrågor, 126 ms
+
 ## Deploy
 
 Fråga Marcus.
