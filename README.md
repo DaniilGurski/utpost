@@ -191,7 +191,8 @@ query TourList {
 }
 ```
 
-Before: [graphql] TourList: 136 databasfrågor, 126 ms
+Före: [graphql] TourList: 136 databasfrågor, 126 ms
+Efter: 2 för varje
 
 ## Deploy
 
