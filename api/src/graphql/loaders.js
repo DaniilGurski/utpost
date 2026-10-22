@@ -1,5 +1,6 @@
 import DataLoader from "dataloader";
 import { query } from "../db/client.js";
+import { mongoClient, toursCollection } from "../db/mongo.js";
 
 function mapOne(keys, rows, getKey) {
   const map = new Map(rows.map((r) => [getKey(r), r]));
@@ -40,12 +41,23 @@ export const createLoaders = (db) => {
       return mapMany(ids, rows, (r) => r.tour_id);
     }),
 
+    // Loggarna läses från MongoDB sedan M5 (npm run migrate:logs).
+    // Punkterna mappas tillbaka till radformen så att LogPoint-resolvrarna är oförändrade.
     getLogsByTourIds: new DataLoader(async (ids) => {
-      const { rows } = await query(
-        "select * from tour_logs where tour_id = any($1) order by recorded_at",
-        [ids],
+      await mongoClient.connect();
+      const docs = await toursCollection()
+        .find(
+          { tour_id: { $in: ids.map(Number) } },
+          { projection: { tour_id: 1, logs: 1 } },
+        )
+        .toArray();
+      const map = new Map(
+        docs.map((d) => [
+          d.tour_id,
+          d.logs.map(({ t, ...rest }) => ({ recorded_at: t, ...rest })),
+        ]),
       );
-      return mapMany(ids, rows, (r) => r.tour_id);
+      return ids.map((id) => map.get(Number(id)) ?? []);
     }),
   };
 };

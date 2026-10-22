@@ -194,6 +194,30 @@ query TourList {
 Före: [graphql] TourList: 136 databasfrågor, 126 ms
 Efter: 2 för varje
 
+## Migrering av turloggar till MongoDB (M5)
+
+`npm run migrate:logs` skriver ett dokument per tur i MongoDB med loggpunkterna inbäddade i `logs`.
+Skriptet går att köra om (`replaceOne` med upsert + unikt index på `tour_id`) och avslutar med felkod om antalen inte stämmer.
+`Tour.logs` i GraphQL läser nu MongoDB; `tour_logs` i Postgres ligger kvar för REST och den gamla klienten.
+
+Första körningen:
+
+```
+Postgres: 201 turer, 5769 rader i tour_logs
+MongoDB: 200 nya dokument, 1 ersatta
+MongoDB: 201 dokument, 5769 loggpunkter i tours-samlingen
+Verifierat
+```
+
+Andra körningen (inget nytt skapas):
+
+```
+Postgres: 201 turer, 5769 rader i tour_logs
+MongoDB: 0 nya dokument, 201 ersatta
+MongoDB: 201 dokument, 5769 loggpunkter i tours-samlingen
+Verifierat
+```
+
 ## Deploy
 
 Fråga Marcus.
