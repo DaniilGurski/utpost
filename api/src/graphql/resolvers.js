@@ -5,8 +5,7 @@ import {
   getTourPhotos,
   createTour,
 } from "../data/tours.js";
-import { listGuides, getGuideById, getGuideBySlug } from "../data/guides.js";
-import { getUserById } from "../data/users.js";
+import { listGuides, getGuideBySlug } from "../data/guides.js";
 import { GraphQLError } from "graphql/error";
 
 const MAX_TOURS = 200;
@@ -18,9 +17,10 @@ const iso = (date) => (date ? new Date(date).toISOString() : null);
 const tourFields = {
   startedAt: (tour) => iso(tour.started_at),
   distanceM: (tour) => tour.distance_m,
-  user: (tour) => getUserById(tour.user_id),
-  guide: (tour) => (tour.guide_id ? getGuideById(tour.guide_id) : null),
-  photos: (tour) => getTourPhotos(tour.id),
+  user: (tour, _, { loaders }) => loaders.getUsersByIds.load(tour.user_id),
+  guide: (tour, _, { loaders }) =>
+    tour.guide_id ? loaders.getGuidesByIds.load(tour.guide_id) : null,
+  photos: (tour, _, { loaders }) => loaders.getPhotosByTourIds.load(tour.id),
 };
 
 export const resolvers = {
@@ -52,7 +52,7 @@ export const resolvers = {
 
   Tour: {
     ...tourFields,
-    logs: (tour) => getTourLogs(tour.id),
+    logs: (tour, _, { loaders }) => loaders.getLogsByTourIds.load(tour.id),
   },
 
   Mutation: {

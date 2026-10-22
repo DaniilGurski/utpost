@@ -3,6 +3,8 @@ import { createYoga } from "graphql-yoga";
 import { queryLog } from "../db/client.js";
 import { schema } from "./schema.js";
 import { verifyAuthHeader } from "../lib/auth.js";
+import { createLoaders } from "./loaders.js";
+import { db } from "../db/client.js";
 
 // Skriver ut antalet databasfrågor per GraphQL-operation, t.ex.
 // "[graphql] Tours: 151 databasfrågor, 87 ms". Underlag för beslutsdokumentet.
@@ -33,6 +35,7 @@ export const yoga = createYoga({
   graphqlEndpoint: "/graphql",
   context: ({ request }) => {
     return {
+      loaders: createLoaders(db),
       user: verifyAuthHeader(request.headers.get("authorization")),
     };
   },
