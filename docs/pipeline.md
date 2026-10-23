@@ -7,6 +7,7 @@ flowchart TD
     A[Commit + push till feature-branch] --> B[Öppna/uppdatera PR mot main]
     B --> C{Workflow triggas: on pull_request}
     C --> Q
+    C --> INT
 
     subgraph Q [Jobb: quality / Kvalitet]
         Q1[checkout] --> Q2[setup-node 22 + npm-cache]
@@ -14,7 +15,19 @@ flowchart TD
         Q3 --> Q4[npm run lint]
         Q4 --> Q5[npm run format:check]
         Q5 --> Q6[npm run test]
+        Q6 --> Q7[npm run typecheck]
     end
+
+    subgraph INT [Jobb: integration / Integration, parallellt, inga needs]
+        S1[services: postgres:16 + mongo:8.2<br/>på localhost, väntar på health-check] --> N1[checkout]
+        N1 --> N2[setup-node 22 + npm-cache]
+        N2 --> N3[npm ci]
+        N3 --> N4[npm run seed]
+        N4 --> N5[npm run migrate:logs]
+        N5 --> N6[npm run test:api]
+    end
+
+    INT -->|röd| X
 
     Q -->|grön| BLD
     Q -->|röd| X[PR blockeras]
@@ -36,6 +49,7 @@ flowchart TD
     end
 
     IMG -->|grön| R{Ruleset uppfyllt?}
+    INT -->|grön| R
     IMG -->|röd| X
     R -->|ja| M[Merge till main]
     R -->|nej| X
@@ -55,6 +69,15 @@ Jobbet bygger Docker-imagerna för `api` och `client` i pipelinen. Vi bygger och
 - **Cache:** lagren cachas i GitHub Actions (`type=gha`), separat för `api` och `client`.
 - **Paketen** i GHCR är publika, så servern kan hämta dem utan inloggning.
 
+## Jobbet `Integration`
+
+Jobbet kör integrationstesterna i `api/` (`npm run test:api`) mot riktiga databaser. Testerna beskrivs i `docs/testing.md`.
+
+- **Databaserna** startas som `services` med samma images som i `compose.yaml` (`postgres:16`, `mongo:8.2`). Stegen startar först när båda svarar på sin health-check.
+- **Adressen är `localhost`** (Postgres 5432, Mongo 27017), inte `postgres`/`mongo` som i compose. Jobbet kör direkt på runnern, och services nås via sina mappade portar. `DATABASE_URL` och `MONGO_URL` sätts på jobbnivå.
+- **Tomma databaser:** `npm run seed` och `npm run migrate:logs` körs före testerna. Utan migreringen finns inga turloggar i Mongo, och testet för `Tour.logs` blir rött.
+- **Inga `needs`:** jobbet körs parallellt med `Kvalitet`, och `Bygg` och `Image` väntar inte på det. Det är required check, så en röd `Integration` stoppar merge, men på `main` publiceras imagerna även om jobbet skulle bli rött.
+
 ## Vad varje steg fångar
 
 | Steg         | Fångar                                                                         |
@@ -63,6 +86,8 @@ Jobbet bygger Docker-imagerna för `api` och `client` i pipelinen. Vi bygger och
 | lint         | Kodproblem och misstänkta mönster (ESLint)                                     |
 | format:check | Filer som inte följer Prettier. Kontrollerar bara, ändrar aldrig               |
 | test         | Regressioner i beteende (Vitest)                                               |
+| typecheck    | Typfel i klient och API (`tsc`)                                                |
+| Integration  | API:et mot riktiga databaser: N+1, inloggningskrav, migrerade loggar           |
 | build        | Trasiga importer och byggfel som lint och test kan missa                       |
 | Image        | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                |
 | Ruleset      | Att inget mergas utan PR, review och gröna checks                              |
@@ -88,12 +113,21 @@ Körning: [2026-09-28] · Sekventiell (needs: quality): ja
 **Total pipeline-tid (vägg-tid):** 30s (jobben summerar till 25s, resten är
 uppstart av runners och väntan mellan jobben)
 
+### Jobbet `Integration` (M5, B7)
+
+| Körning | Jobbtid |
+| ------- | ------- |
+| PR      | 50s     |
+| `main`  | 44s     |
+
+Jobbet kör parallellt med `Kvalitet`, så det förlänger pipelinen bara om det är det långsammaste spåret.
+
 ## Ruleset på `main`
 
 Bekräfta uppgifterna med den som ställt in rulesetet:
 
 - Restrict deletions
 - Pull request krävs innan merge, minst en godkännare
-- Required status checks: `Kvalitet`, `Bygg` och `Image`
+- Required status checks: `Kvalitet`, `Integration`, `Bygg` och `Image`
 - Branchen som mergas behöver vara up to date med main
 - Blockera force push
