@@ -172,6 +172,8 @@ Vi använder **trunk-based development med pull requests**. Strategin är ny fö
 
 ## Mätning före/efter (M5)
 
+B4:
+
 ```graphql
 query TourList {
   tours {
@@ -193,6 +195,20 @@ query TourList {
 
 Före: [graphql] TourList: 136 databasfrågor, 126 ms
 Efter: 2 för varje
+
+B6:
+Regressionstestet: "tours returns 50 tours with their user in 2 database queries, not 51"
+
+loader bortkopplad: 51 queries
+
+B7:
+PR tog 50s, main tog 44s
+Required checks:
+
+- Quality
+- Integration
+- Build
+- Image
 
 ## Migrering av turloggar till MongoDB (M5)
 

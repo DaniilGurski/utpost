@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=../.env src/index.js ",
+    "dev": "node --watch --env-file-if-exists=../.env src/index.js ",
     "start": "node src/index.js",
     "seed": "node src/db/seed.js",
     "typecheck": "tsc --noEmit",
-    "mongo:smoke": "node --env-file=../.env src/db/mongo-smoke.js",
-    "migrate:logs": "node --env-file=../.env src/db/migrate-logs.js",
+    "mongo:smoke": "node --env-file-if-exists=../.env src/db/mongo-smoke.js",
+    "migrate:logs": "node --env-file-if-exists=../.env src/db/migrate-logs.js",
     "test": "vitest run"
   },
   "dependencies": {
