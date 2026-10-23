@@ -9,7 +9,8 @@
     "seed": "node src/db/seed.js",
     "typecheck": "tsc --noEmit",
     "mongo:smoke": "node --env-file=../.env src/db/mongo-smoke.js",
-    "migrate:logs": "node --env-file=../.env src/db/migrate-logs.js"
+    "migrate:logs": "node --env-file=../.env src/db/migrate-logs.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@utpost/shared": "^0.0.0",
@@ -28,6 +29,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.3",
-    "@types/pg": "^8.23.1"
+    "@types/pg": "^8.23.1",
+    "vitest": "^5.0.5"
   }
 }

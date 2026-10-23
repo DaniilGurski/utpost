@@ -19,6 +19,7 @@
     "mongo:smoke": "npm run mongo:smoke -w api",
     "migrate:logs": "npm run migrate:logs -w api",
     "test": "npm run test -w client",
+    "test:api": "npm run test -w api",
     "build": "npm run build -w client",
     "seed": "npm run seed -w api",
     "typecheck": "npm run typecheck -w client && npm run typecheck -w api"
