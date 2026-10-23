@@ -1,5 +1,5 @@
 import DataLoader from "dataloader";
-import { query } from "../db/client.js";
+import { query, queryLog } from "../db/client.js";
 import { mongoClient, toursCollection } from "../db/mongo.js";
 
 function mapOne(keys, rows, getKey) {
@@ -45,6 +45,9 @@ export const createLoaders = (db) => {
     // Punkterna mappas tillbaka till radformen så att LogPoint-resolvrarna är oförändrade.
     getLogsByTourIds: new DataLoader(async (ids) => {
       await mongoClient.connect();
+      // Räknas som en databasfråga, precis som SQL-frågorna i query().
+      const log = queryLog.getStore();
+      if (log) log.count++;
       const docs = await toursCollection()
         .find(
           { tour_id: { $in: ids.map(Number) } },
