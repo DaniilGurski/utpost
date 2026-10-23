@@ -8,14 +8,16 @@ import { db } from "../db/client.js";
 
 // Skriver ut antalet databasfrågor per GraphQL-operation, t.ex.
 // "[graphql] Tours: 151 databasfrågor, 87 ms". Underlag för beslutsdokumentet.
+// Antalet läggs också i svarets extensions.queryCount, så att testerna kan kontrollera det.
 const logQueryCount = {
   onExecute({ args }) {
+    // Utan trackQueries (t.ex. yoga.fetch i testerna) startar vi räkningen här.
+    if (!queryLog.getStore()) queryLog.enterWith({ count: 0 });
     const log = queryLog.getStore();
-    if (!log) return;
     const before = log.count;
     const start = performance.now();
     return {
-      onExecuteDone() {
+      onExecuteDone({ result, setResult }) {
         const name =
           getOperationAST(args.document, args.operationName)?.name?.value ??
           "anonym";
@@ -23,6 +25,11 @@ const logQueryCount = {
         console.log(
           `[graphql] ${name}: ${log.count - before} databasfrågor, ${ms} ms`,
         );
+        if (Symbol.asyncIterator in result) return;
+        setResult({
+          ...result,
+          extensions: { ...result.extensions, queryCount: log.count - before },
+        });
       },
     };
   },

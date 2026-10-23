@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
 import { defineConfig } from "vitest/config";
 
+if (existsSync("../.env")) process.loadEnvFile("../.env");
 // M5: integrationstester mot GraphQL-servern. Körs i Node (ingen jsdom), mot en RIKTIG databas:
 // lokalt den ni har igång (docker compose up -d postgres mongo + npm run seed + npm run migrate:logs),
 // i pipelinen två services som startas för jobbet (ci.yml, jobbet Integration).
