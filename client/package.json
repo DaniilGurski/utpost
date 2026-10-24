@@ -13,7 +13,7 @@
     "format:check": "prettier --check src/",
     "format:write": "prettier --write src/",
     "typecheck": "vue-tsc --noEmit",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen --config codegen.ts && prettier --write src/gql/"
   },
   "dependencies": {
     "@urql/vue": "^2.1.1",
