@@ -1,9 +1,16 @@
+import { ref } from "vue";
 import { cleanup, render, screen, within } from "@testing-library/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { useQuery } from "@urql/vue";
 import ToursView from "./ToursView.vue";
 
-const fetchMock = vi.fn();
-vi.stubGlobal("fetch", fetchMock);
+// gql ska fungera som vanligt, bara useQuery byts ut
+vi.mock("@urql/vue", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@urql/vue")>()),
+  useQuery: vi.fn(),
+}));
+
+const mockedUseQuery = vi.mocked(useQuery);
 
 const makeTour = (title: string, overrides = {}) => ({
   id: "1",
@@ -15,8 +22,16 @@ const makeTour = (title: string, overrides = {}) => ({
   ...overrides,
 });
 
-const respondWith = (body: unknown, status = 200) =>
-  fetchMock.mockResolvedValue(new Response(JSON.stringify(body), { status }));
+const respondWith = (result: {
+  data?: unknown;
+  fetching?: boolean;
+  error?: { message: string };
+}) =>
+  mockedUseQuery.mockReturnValue({
+    data: ref(result.data),
+    fetching: ref(result.fetching ?? false),
+    error: ref(result.error),
+  } as unknown as ReturnType<typeof useQuery>);
 
 const renderView = () =>
   render(ToursView, {
@@ -25,7 +40,7 @@ const renderView = () =>
 
 afterEach(() => {
   cleanup();
-  fetchMock.mockReset();
+  mockedUseQuery.mockReset();
 });
 
 describe("ToursView", () => {
@@ -54,8 +69,8 @@ describe("ToursView", () => {
     expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
   });
 
-  it("shows the error message when the API fails", async () => {
-    respondWith({ errors: [{ message: "Databasen är nere" }] });
+  it("shows the error message when GraphQL returns an error", async () => {
+    respondWith({ error: { message: "Databasen är nere" } });
     renderView();
 
     expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
