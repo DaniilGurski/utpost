@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { gql } from "../graphql";
+import { gql, useQuery } from "@urql/vue";
 
 type ToursData = {
   tours: {
@@ -13,52 +12,35 @@ type ToursData = {
   }[];
 };
 
-const QUERY = /* GraphQL */ `
-  query Turer {
-    tours(limit: 50) {
-      id
-      title
-      distanceM
-      user {
-        displayName
-      }
-      guide {
-        title
-      }
-      photos {
+const { data, fetching, error } = useQuery<ToursData>({
+  query: gql`
+    query Turer {
+      tours(limit: 50) {
         id
+        title
+        distanceM
+        user {
+          displayName
+        }
+        guide {
+          title
+        }
+        photos {
+          id
+        }
       }
     }
-  }
-`;
-
-const tours = ref<ToursData["tours"]>([]);
-const loading = ref(true);
-const error = ref("");
-
-onMounted(async () => {
-  try {
-    const data = await gql<ToursData>(QUERY);
-    tours.value = data.tours;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : "Något gick fel";
-  } finally {
-    loading.value = false;
-  }
+  `,
 });
 </script>
 
 <template>
   <h1>Turer</h1>
 
-  <div>
-    <p v-if="loading">Laddar...</p>
-    <p v-if="error">
-      {{ error }}
-    </p>
-  </div>
+  <p v-if="error">{{ error.message }}</p>
+  <p v-else-if="fetching || !data">Laddar...</p>
 
-  <table v-if="tours.length > 0">
+  <table v-else-if="data.tours.length > 0">
     <thead>
       <tr>
         <th>Tur</th>
@@ -69,7 +51,7 @@ onMounted(async () => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="tour in tours" :key="tour.id">
+      <tr v-for="tour in data.tours" :key="tour.id">
         <td>
           <RouterLink :to="{ name: 'tour', params: { id: tour.id } }">
             {{ tour.title }}
@@ -83,7 +65,7 @@ onMounted(async () => {
     </tbody>
   </table>
 
-  <p v-else-if="!loading && !error">Inga turer</p>
+  <p v-else>Inga turer</p>
 </template>
 
 <style></style>
