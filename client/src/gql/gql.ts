@@ -14,10 +14,10 @@ import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-  "\n  query Turer {\n    tours(limit: 50) {\n      id\n      title\n      distanceM\n      user {\n        displayName\n      }\n      guide {\n        title\n      }\n      photos {\n        id\n      }\n    }\n  }\n": typeof types.TurerDocument;
+  "\n    query Turer {\n      tours(limit: 50) {\n        id\n        title\n        distanceM\n        user {\n          displayName\n        }\n        guide {\n          title\n        }\n        photos {\n          id\n        }\n      }\n    }\n  ": typeof types.TurerDocument;
 };
 const documents: Documents = {
-  "\n  query Turer {\n    tours(limit: 50) {\n      id\n      title\n      distanceM\n      user {\n        displayName\n      }\n      guide {\n        title\n      }\n      photos {\n        id\n      }\n    }\n  }\n":
+  "\n    query Turer {\n      tours(limit: 50) {\n        id\n        title\n        distanceM\n        user {\n          displayName\n        }\n        guide {\n          title\n        }\n        photos {\n          id\n        }\n      }\n    }\n  ":
     types.TurerDocument,
 };
 
@@ -39,8 +39,8 @@ export function graphql(source: string): unknown;
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n  query Turer {\n    tours(limit: 50) {\n      id\n      title\n      distanceM\n      user {\n        displayName\n      }\n      guide {\n        title\n      }\n      photos {\n        id\n      }\n    }\n  }\n",
-): (typeof documents)["\n  query Turer {\n    tours(limit: 50) {\n      id\n      title\n      distanceM\n      user {\n        displayName\n      }\n      guide {\n        title\n      }\n      photos {\n        id\n      }\n    }\n  }\n"];
+  source: "\n    query Turer {\n      tours(limit: 50) {\n        id\n        title\n        distanceM\n        user {\n          displayName\n        }\n        guide {\n          title\n        }\n        photos {\n          id\n        }\n      }\n    }\n  ",
+): (typeof documents)["\n    query Turer {\n      tours(limit: 50) {\n        id\n        title\n        distanceM\n        user {\n          displayName\n        }\n        guide {\n          title\n        }\n        photos {\n          id\n        }\n      }\n    }\n  "];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
