@@ -172,6 +172,10 @@ Vi använder **trunk-based development med pull requests**. Strategin är ny fö
 
 ## Mätning före/efter (M5)
 
+B1:
+Före M5: När man navigerar från Turer till Guider och tillbaka syns två POST /graphql för turlistan, ett per besök, eftersom gql() gör ett nytt fetch varje gång vyn monteras.
+Efter M5: När man navigerar från Turer till Guider och tillbaka syns bara ett POST /graphql för turlistan, eftersom urqls cache svarar på det andra besöket.
+
 B4:
 
 ```graphql
