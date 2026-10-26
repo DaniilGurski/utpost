@@ -177,6 +177,16 @@ Före M5: När man navigerar från Turer till Guider och tillbaka syns två POST
 Efter M5: När man navigerar från Turer till Guider och tillbaka syns bara ett POST /graphql för turlistan, eftersom urqls cache svarar på det andra besöket.
 Turdetalj (`TourDetails`): första besöket på en tur ger ett POST /graphql, att gå tillbaka till listan och öppna samma tur igen ger inget nytt, en tur med annat `id` ger ett nytt POST (cachen nycklas på fråga + variabler).
 
+B2:
+Tog bort `distanceM` från `type Tour` i schemat och körde `npm run typecheck` (kör codegen först):
+
+```
+Error 0: Cannot query field "distanceM" on type "Tour".
+    at client/src/views/TourDetailView.vue:5:9
+```
+
+Codegen stannar vid första frågan som inte validerar, så `ToursView` (som också använder `distanceM`) syns först när `TourDetailView` är fixad.
+
 B4:
 
 ```graphql
