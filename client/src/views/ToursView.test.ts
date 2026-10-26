@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useQuery } from "@urql/vue";
 import ToursView from "./ToursView.vue";
 
-// gql ska fungera som vanligt, bara useQuery byts ut
+// Bara useQuery byts ut, resten av @urql/vue fungerar som vanligt
 vi.mock("@urql/vue", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@urql/vue")>()),
   useQuery: vi.fn(),
