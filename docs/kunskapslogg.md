@@ -215,13 +215,21 @@ Nej.
 
 ## Vecka 43 – GraphQL i klienten
 
-**Kursmål:** (fri post)
+**Kursmål:** Fullstack 2, Cloud 6, Cloud 11
 
 ### Vad jag förstått
 
+För Toursview hämtar klienten nu data med urql istället för en gql()-hjälpare med vanlig fetch vilket gör att den kan använda sig av caching (cacheExchange). Data som redan hämtats sparas mellan anropen vilket minskar antal dataförfrågningar för aktuella vyn.
+
+Byte av klient gjorde att ToursView.test.ts föll med "No urql Client was provided". Jag skrev om testet så att det mockar useQuery. Det kontrollerar bara att vyn visar rätt vid data, laddning och fel, så det kan aldrig se hur många databasfrågor API:et gör. Det gör integrationstesterna vi skrev i teamet, som kör hela kedjan mot riktiga databaser.
+
 ### Var det syns i mitt arbete
 
+client/src/urql.ts, client/src/main.ts, client/src/views/ToursView.vue, client/src/views/ToursView.test.ts, README (B1)
+
 ### Kvar att förstå
+
+Codegen (när man genererar typerna från schemat i stället för att skriva de för hand).
 
 ### Siktar på VG
 
