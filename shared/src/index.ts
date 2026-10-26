@@ -31,13 +31,6 @@ type Tour = {
   notes: string | null;
 };
 
-type TourEnriched = Tour & {
-  user: User;
-  guide: Guide;
-  photos: Photo[];
-  logs: TourLog[];
-};
-
 type TourLog = {
   id: number;
   tour_id: number;
@@ -74,7 +67,6 @@ export type {
   Guide,
   User,
   Tour,
-  TourEnriched,
   TourLog,
   Photo,
   AuthResponse,
