@@ -1,19 +1,9 @@
 <script setup lang="ts">
-import { gql, useQuery } from "@urql/vue";
+import { useQuery } from "@urql/vue";
+import { graphql } from "../gql";
 
-type ToursData = {
-  tours: {
-    id: string;
-    title: string;
-    distanceM: number;
-    user: { displayName: string };
-    guide: { title: string } | null;
-    photos: { id: string }[];
-  }[];
-};
-
-const { data, fetching, error } = useQuery<ToursData>({
-  query: gql`
+const { data, fetching, error } = useQuery({
+  query: graphql(`
     query Turer {
       tours(limit: 50) {
         id
@@ -30,7 +20,7 @@ const { data, fetching, error } = useQuery<ToursData>({
         }
       }
     }
-  `,
+  `),
 });
 </script>
 
