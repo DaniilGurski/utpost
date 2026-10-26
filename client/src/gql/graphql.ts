@@ -8,6 +8,23 @@ export type Incremental<T> =
       [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
     };
 import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+export type TourDetailsQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+export type TourDetailsQuery = {
+  tour: {
+    title: string;
+    distanceM: number;
+    notes: string | null;
+    logs: Array<{
+      recordedAt: string;
+      elevationM: number | null;
+      heartRate: number | null;
+    }>;
+  } | null;
+};
+
 export type TurerQueryVariables = Exact<{ [key: string]: never }>;
 
 export type TurerQuery = {
@@ -21,6 +38,74 @@ export type TurerQuery = {
   }>;
 };
 
+export const TourDetailsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "TourDetails" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "tour" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "id" },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "distanceM" } },
+                { kind: "Field", name: { kind: "Name", value: "notes" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "logs" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "recordedAt" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "elevationM" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "heartRate" },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TourDetailsQuery, TourDetailsQueryVariables>;
 export const TurerDocument = {
   kind: "Document",
   definitions: [

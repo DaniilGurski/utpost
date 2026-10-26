@@ -1,65 +1,57 @@
 <script setup lang="ts">
-import type { TourEnriched } from "@utpost/shared";
 import { elevationGain } from "../lib/tours";
-import { get } from "../api";
-import { watch, ref, computed } from "vue";
+import { computed } from "vue";
+import { useQuery } from "@urql/vue";
+import { graphql } from "../gql";
 
 const props = defineProps<{ id: string }>();
 
-const tour = ref<TourEnriched | null>(null);
-const loading = ref(false);
-const error = ref("");
-
-const climb = computed(() => {
-  if (!tour.value) return;
-  return elevationGain(tour.value.logs);
+const { data, fetching, error } = useQuery({
+  query: graphql(`
+    query TourDetails($id: ID!) {
+      tour(id: $id) {
+        title
+        distanceM
+        notes
+        logs {
+          recordedAt
+          elevationM
+          heartRate
+        }
+      }
+    }
+  `),
+  variables: computed(() => ({ id: props.id })),
 });
 
-/*
-TODO: Should use `tour` as a prop instead of fetching it.
-This mirrors the original React component `TourDetail` for M1
-*/
-const load = async () => {
-  loading.value = true;
-  tour.value = null;
-  error.value = "";
-  const result = await get<TourEnriched>(`/tours/${props.id}`);
-  loading.value = false;
-
-  if (!result.ok) {
-    error.value =
-      result.error.status === 404 ? "Turen finns inte." : result.error.message;
-    return;
-  }
-
-  tour.value = result.value;
-};
-
-watch(() => props.id, load, { immediate: true });
+const tour = computed(() => data.value?.tour ?? null);
+const climb = computed(() => {
+  if (!tour.value) return;
+  return elevationGain(
+    tour.value.logs.map((log) => ({ elevationM: log.elevationM })),
+  );
+});
 </script>
 
 <template>
-  <div>
-    <p v-if="loading">Laddar...</p>
-    <p v-if="error">
-      {{ error }}
-    </p>
-  </div>
+  <p v-if="error">{{ error.message }}</p>
+  <p v-else-if="fetching || !data">Laddar...</p>
+  <p v-else-if="!tour">Turen finns inte.</p>
 
-  <div v-if="tour">
+  <div v-else>
     <h1>{{ tour.title }}</h1>
     <p>
       {{
-        `${Math.round(tour.distance_m / 100) / 10} km · ${tour.logs.length} mätpunkter · ${climb} höjdmeter`
+        `${Math.round(tour.distanceM / 100) / 10} km · ${tour.logs.length} mätpunkter · ${climb} höjdmeter`
       }}
     </p>
     <p v-if="tour.notes">{{ tour.notes }}</p>
 
     <h2>Mätpunkter</h2>
     <ol>
-      <li v-for="log in tour.logs" :key="log.id">
+      <li v-for="(log, i) in tour.logs" :key="i">
         {{
-          `${new Date(log.recorded_at).toLocaleTimeString("sv-SE")} · ${log.elevation_m} m · ${log.heart_rate} slag/min`
+          `${new Date(log.recordedAt).toLocaleTimeString("sv-SE")} · ${log.elevationM} m · ${log.heartRate} slag/min`
         }}
       </li>
     </ol>
