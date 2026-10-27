@@ -72,4 +72,4 @@ npm test · npm run test:watch --workspace=client · npm run test:api (kräver c
 
 ## Senaste körning av `npm run test:api` (B6)
 
-6 tester, alla gröna · Tid: _TODO: klistra in de sista raderna ur `npm run test:api`_
+6 tester, alla gröna · Tid: 7.14s (import 70%, tests 16%, transform 14%)
