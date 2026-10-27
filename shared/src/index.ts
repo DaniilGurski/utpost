@@ -63,12 +63,4 @@ type ApiError = {
   status: number | null;
 };
 
-export type {
-  Guide,
-  User,
-  Tour,
-  TourLog,
-  Photo,
-  AuthResponse,
-  ApiError,
-};
+export type { Guide, User, Tour, TourLog, Photo, AuthResponse, ApiError };

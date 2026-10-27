@@ -172,7 +172,8 @@ Vi använder **trunk-based development med pull requests**. Strategin är ny fö
 
 ## Mätning före/efter (M5)
 
-B1:
+### B1:
+
 Före M5: När man navigerar från Turer till Guider och tillbaka syns två POST /graphql för turlistan, ett per besök, eftersom gql() gör ett nytt fetch varje gång vyn monteras.
 Efter M5: När man navigerar från Turer till Guider och tillbaka syns bara ett POST /graphql för turlistan, eftersom urqls cache svarar på det andra besöket.
 Turdetalj (`TourDetails`): första besöket på en tur ger ett POST /graphql, att gå tillbaka till listan och öppna samma tur igen ger inget nytt, en tur med annat `id` ger ett nytt POST (cachen nycklas på fråga + variabler).
@@ -187,7 +188,14 @@ Error 0: Cannot query field "distanceM" on type "Tour".
 
 Codegen stannar vid första frågan som inte validerar, så `ToursView` (som också använder `distanceM`) syns först när `TourDetailView` är fixad.
 
-B4:
+### B3:
+
+Två vyer:
+
+- ToursView använder `Turer` query
+- TourDetailView använder `TourDetails`
+
+### B4:
 
 ```graphql
 query TourList {
@@ -211,21 +219,7 @@ query TourList {
 Före: [graphql] TourList: 136 databasfrågor, 126 ms
 Efter: 2 för varje
 
-B6:
-Regressionstestet: "tours returns 50 tours with their user in 2 database queries, not 51"
-
-loader bortkopplad: 51 queries
-
-B7:
-PR tog 50s, main tog 44s
-Required checks:
-
-- Quality
-- Integration
-- Build
-- Image
-
-## Migrering av turloggar till MongoDB (M5)
+### B5:
 
 `npm run migrate:logs` skriver ett dokument per tur i MongoDB med loggpunkterna inbäddade i `logs`.
 Skriptet går att köra om (`replaceOne` med upsert + unikt index på `tour_id`) och avslutar med felkod om antalen inte stämmer.
@@ -248,6 +242,21 @@ MongoDB: 0 nya dokument, 201 ersatta
 MongoDB: 201 dokument, 5769 loggpunkter i tours-samlingen
 Verifierat
 ```
+
+### B6:
+
+Regressionstestet: "tours returns 50 tours with their user in 2 database queries, not 51"
+Loader bortkopplad: 51 queries
+
+### B7:
+
+PR tog 50s, main tog 44s
+Required checks:
+
+- Quality
+- Integration
+- Build
+- Image
 
 ## Deploy
 
