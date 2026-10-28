@@ -7,6 +7,7 @@
 | Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | -            |
 | Fullstack 1 · Cloud 4    | V41          | PR #83, PR #87 `docs/database.md`, PR #90 `README.md`, PR #92               | -            |
 | Fullstack 2              | V42          | PR #97, PR #99, PR #111, PR #114 `docs/decisions/api-stil.md`               | -            |
+| Fullstack 2 · Cloud 6    | V43          | PR #118, PR #119, PR #120, PR #122/#125, PR #124, PR #133, `README.md`      | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -142,6 +143,36 @@ Fullstack 2: PR #97 (grund), PR #99 (resolvers, N+1-loggning), PR #111 (mutation
 ### Kvar att förstå
 
 Hur man löser N+1 i praktiken (DataLoader) och hur cache fungerar med GraphQL.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 43 – GraphQL i klienten
+
+**Kursmål:** Fullstack 2 · Cloud 6
+
+### Vad jag förstått
+
+Fullstack 2:
+
+- DataLoader löser N+1 från vecka 42: TourList gick från 136 databasfrågor till 2
+- urqls cache nycklas på fråga + variabler: samma tur igen ger inget nytt anrop, ett annat `id` gör det
+- Migrera tur-loggar till MongoDB som inbäddade dokument, med ett skript som går att köra om (upsert + unikt index)
+
+Cloud 6:
+
+- Integrationstester mot riktiga databaser, med ett regressionstest som räknar frågor (2 med loader, 51 utan)
+- Ett integrationsjobb i CI som kör testerna
+
+### Var det syns i mitt arbete
+
+Fullstack 2: PR #118 (mätning före), PR #119 (DataLoader), PR #120 (Mongo-migrering), PR #133 (`TourDetailView` med urql), `README.md` (B1, B4, B5)
+Cloud 6: PR #122/#125 (integrationstester), PR #124 (integrationsjobb), `README.md` (B6, B7)
+
+### Kvar att förstå
+
+Inget just nu.
 
 ### Siktar på VG
 
