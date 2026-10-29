@@ -27,7 +27,7 @@ const toDoc = (tour, logs) => ({
   stats: { points: logs.length },
 });
 
-const run = async () => {
+export const run = async () => {
   const tours = (await pool.query("select * from tours order by id")).rows;
   const logRows = (
     await pool.query("select * from tour_logs order by tour_id, recorded_at")
