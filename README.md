@@ -279,6 +279,20 @@ docker compose exec client grep proxy_pass /etc/nginx/conf.d/default.conf
     proxy_pass http://api:4000;
 ```
 
+### B3:
+
+Den gamla JWT-hemligheten låg hårdkodad i `api/src/config.js` och är bränd. Nu läses den från `JWT_SECRET`, och standardvärdet i koden är ett dev-värde som bara används på våra egna maskiner.
+
+```
+git log --oneline -S 'utpost-super-secret'
+1f35a64 feat: create mongo client
+4a92f71 Initial commit
+```
+
+`4a92f71` lade till värdet och `1f35a64` tog bort det.
+
+Värdet i Azure skapas av `infra/azure/create-staging.sh` med `openssl rand -hex 32` och sparas bara som secret (`jwt-secret`) i Container Appen, som api-containern läser som `JWT_SECRET`.
+
 ## Deploy
 
 Fråga Marcus.
