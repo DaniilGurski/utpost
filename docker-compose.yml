@@ -44,6 +44,8 @@ services:
         condition: service_healthy
 
   client:
+    environment:
+      API_UPSTREAM: api:4000
     build:
       context: .
       dockerfile: client/Dockerfile
