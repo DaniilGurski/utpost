@@ -76,7 +76,7 @@ Loggpunkter och foton **bäddas in** eftersom de alltid läses tillsammans med t
 | `{ tour_id: 1 }`, unique | `GET /tours/:id`, och verifiering av migreringen |
 | `{ started_at: -1 }`     | `GET /tours` (nyaste först)                      |
 
-Inget index på `user_id` eller `guide_id` än: ingen skärm frågar efter "alla turer för den här användaren". Det läggs till den dag en sådan skärm byggs.
+Inget index på `user_id` eller `guide_id` än. Sedan M6 listar profilsidan användarens egna turer, men den hämtar `tours(limit: 200)` och filtrerar i klienten, så användare med turer utanför de 200 senaste får en ofullständig lista. Ett `user_id`-index och ett filter i schemat är kända skulder.
 
 **Lista mot detalj:** `GET /tours` använder en projektion utan `logs` (titel, datum, `stats`, namn-ögonblicksbilder). `GET /tours/:id` returnerar hela dokumentet. Det är den stora vinsten, och den kommer av modellen plus projektionen.
 
