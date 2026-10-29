@@ -24,8 +24,9 @@ app.get("/api/health", async (req, res) => {
   const status = {
     postgres: pg.status === "fulfilled" ? "ok" : "error",
     mongodb: mongo.status === "fulfilled" ? "ok" : "error",
+    sha: config.gitSha,
   };
-  const healthy = Object.values(status).every((s) => s === "ok");
+  const healthy = [pg, mongo].every((r) => r.status === "fulfilled");
   res.status(healthy ? 200 : 503).json(status);
 });
 
