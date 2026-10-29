@@ -131,5 +131,6 @@ Inget index på `user_id` eller `guide_id` än: ingen skärm frågar efter "alla
 - **Kod:** `TOURS_SOURCE`-flaggan lägger en liten gren i tur-routerna. Den tas bort när vi är säkra på Mongo.
 - **Frysta Postgres-tabeller** kostar lagring och kan förvirra. Vi accepterar det som priset för att kunna backa.
 - Namn-ögonblicksbilden kan bli inaktuell, se dokumentmodellen.
+- **`tour_logs` efter M6:** ingen klient läser tabellen längre (GraphQL läser loggpunkterna ur Mongo, bara REST-routerna `GET /api/tours` och `/api/tours/:id` läser den). Den behålls fryst som reträtt för `TOURS_SOURCE=postgres`, och REST-routerna lämnas orörda.
 
 **Skrivet av:** Daniil Gurski
