@@ -18,32 +18,36 @@ E2E: inte i M2. Vi tar det först när flödet inloggning till tur finns, och ve
 
 ## Karta: vad testas var
 
-| Del av Utpost    | Beteende                                                        | Nivå        | Varför just där?                                          | Finns test i dag? |
-| ---------------- | --------------------------------------------------------------- | ----------- | --------------------------------------------------------- | ----------------- |
-| `elevationGain`  | summerar bara stigningar, inte nedförsbackar                    | enhet       | ren funktion, ingen Vue eller API behövs                  | ja                |
-| `elevationGain`  | tom tur ger 0                                                   | enhet       | ren funktion, kantfall                                    | ja                |
-| `elevationGain`  | hoppar över mätpunkter utan höjd i stället för att räkna 0      | enhet       | ren funktion, kantfall som annars ger fel höjdmeter       | ja                |
-| `GuidesView`     | sökfältet filtrerar guider på titel                             | komponent   | sökningen är logik som användaren ser först               | ja                |
-| `GuidesView`     | visar "N träffar" eller "Inga träffar" efter sökning            | komponent   | räknaren är det användaren läser av efter en sökning      | ja                |
-| `GuidesView`     | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom         | ja                |
-| `ToursView`      | tabellen visar tur, av, guide, längd och bilder när data kommer | komponent   | huvudflödet: användaren ska se sina turer                 | ja                |
-| `ToursView`      | visar "Inga turer" när listan är tom                            | komponent   | tomt läge ska skilja sig från laddning och fel            | ja                |
-| `ToursView`      | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom         | ja                |
-| `TourDetailView` | visar längd, antal mätpunkter och höjdmeter för en tur          | komponent   | här fanns höjdmeterbuggen, siffran måste stämma med datan | ja                |
-| `TourDetailView` | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom         | ja                |
-| GraphQL `tours`  | 50 turer med `user` på 2 databasfrågor, inte 51 (N+1)           | integration | DataLoader-fixen syns bara mot en riktig databas          | ja                |
-| GraphQL `guide`  | okänd slug ger `null`, inte ett fel                             | integration | kontraktet mot klienten: "finns inte" är inget fel        | ja                |
-| GraphQL          | okänt fält ger `errors` med status 200                          | integration | så svarar GraphQL, klienten måste läsa `errors`           | ja                |
-| `createTour`     | utan token avvisas med `UNAUTHENTICATED`                        | integration | inloggningskravet får inte försvinna                      | ja                |
-| `createTour`     | med token skapas turen för den inloggade användaren             | integration | skrivvägen hela vägen till databasen (testet städar)      | ja                |
-| `Tour.logs`      | mätpunkterna kommer från MongoDB, lika många som i Postgres     | integration | migreringen får inte tappa mätpunkter                     | ja                |
+| Del av Utpost     | Beteende                                                        | Nivå        | Varför just där?                                                         | Finns test i dag? |
+| ----------------- | --------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------ | ----------------- |
+| `elevationGain`   | summerar bara stigningar, inte nedförsbackar                    | enhet       | ren funktion, ingen Vue eller API behövs                                 | ja                |
+| `elevationGain`   | tom tur ger 0                                                   | enhet       | ren funktion, kantfall                                                   | ja                |
+| `elevationGain`   | hoppar över mätpunkter utan höjd i stället för att räkna 0      | enhet       | ren funktion, kantfall som annars ger fel höjdmeter                      | ja                |
+| `GuidesView`      | sökfältet filtrerar guider på titel                             | komponent   | sökningen är logik som användaren ser först                              | ja                |
+| `GuidesView`      | visar "N träffar" eller "Inga träffar" efter sökning            | komponent   | räknaren är det användaren läser av efter en sökning                     | ja                |
+| `GuidesView`      | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom                        | ja                |
+| `ToursView`       | tabellen visar tur, av, guide, längd och bilder när data kommer | komponent   | huvudflödet: användaren ska se sina turer                                | ja                |
+| `ToursView`       | visar "Inga turer" när listan är tom                            | komponent   | tomt läge ska skilja sig från laddning och fel                           | ja                |
+| `ToursView`       | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom                        | ja                |
+| `TourDetailView`  | visar längd, antal mätpunkter och höjdmeter för en tur          | komponent   | här fanns höjdmeterbuggen, siffran måste stämma med datan                | ja                |
+| `TourDetailView`  | visar felmeddelande när API:et failar                           | komponent   | felvägen får inte krascha vyn eller lämna den tom                        | ja                |
+| `GuideDetailView` | visar titel, region, svårighet, längd och guidetexten           | komponent   | huvudflödet: guiden ska gå att läsa från en länk                         | ja                |
+| `GuideDetailView` | 404 ger "Guiden finns inte.", andra fel visar felmeddelandet    | komponent   | "finns inte" och fel är olika lägen för användaren                       | ja                |
+| `ProfileView`     | visar namn, e-post och roll och bara användarens egna turer     | komponent   | filtreringen sker i klienten, så den får inte släppa igenom andras turer | ja                |
+| `ProfileView`     | visar "Du har inga turer än." när användaren saknar turer       | komponent   | tomt läge ska skilja sig från laddning och fel                           | ja                |
+| GraphQL `tours`   | 50 turer med `user` på 2 databasfrågor, inte 51 (N+1)           | integration | DataLoader-fixen syns bara mot en riktig databas                         | ja                |
+| GraphQL `guide`   | okänd slug ger `null`, inte ett fel                             | integration | kontraktet mot klienten: "finns inte" är inget fel                       | ja                |
+| GraphQL           | okänt fält ger `errors` med status 200                          | integration | så svarar GraphQL, klienten måste läsa `errors`                          | ja                |
+| `createTour`      | utan token avvisas med `UNAUTHENTICATED`                        | integration | inloggningskravet får inte försvinna                                     | ja                |
+| `createTour`      | med token skapas turen för den inloggade användaren             | integration | skrivvägen hela vägen till databasen (testet städar)                     | ja                |
+| `Tour.logs`       | mätpunkterna kommer från MongoDB, lika många som i Postgres     | integration | migreringen får inte tappa mätpunkter                                    | ja                |
 
 ## Regler
 
 - En PR mergas när testerna är gröna både lokalt och i pipelinen. Resten av flödet står i README.
 - Varje buggfix ur `docs/debt.md` får ett regressionstest med `TD-xx` i namnet. Vi försöker committa testet (rött) före fixen (grönt), men en annan ordning blockerar inte merge. Buggar utanför `debt.md` omfattas inte av regeln.
 - Integrationstester mockar ingenting. De kör mot seedad data, och ett test som skriver till databasen tar bort det efteråt.
-- Vi mockar API:et i komponenttester genom att stubba global `fetch` med `vi.stubGlobal("fetch", fetchMock)` och svara med `new Response(JSON.stringify(body), { status })`. `mockReset` körs i `beforeEach`.
+- Vi mockar API:et i komponenttester. Vyer som använder REST stubbar global `fetch` med `vi.stubGlobal("fetch", fetchMock)` och svarar med `new Response(JSON.stringify(body), { status })`. Vyer som använder GraphQL mockar `useQuery` med `vi.mock("@urql/vue", …)` och låter den returnera `data`, `fetching` och `error` som refs. `mockReset` körs i `afterEach`.
 - Täckning: inget procentkrav. En siffra uppmuntrar tester som bara kör kod. Kravet är att varje rad i kartan har ett test som blir rött om buggen kommer tillbaka. Vi omprövade det i M5 och behåller regeln även för API-testerna.
 - Testfiler ligger bredvid källfilen och heter `<fil>.test.ts`. Testnamn beskriver beteende ur användarens synvinkel.
 
