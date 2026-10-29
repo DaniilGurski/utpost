@@ -4,11 +4,16 @@ import GuideDetailView from "../views/GuideDetailView.vue";
 import ToursView from "../views/ToursView.vue";
 import TourDetailView from "../views/TourDetailView.vue";
 import LoginView from "../views/LoginView.vue";
+import ProfileView from "../views/ProfileView.vue";
 import { useSessionStore } from "../stores/session.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/",
+      redirect: { name: "guides" },
+    },
     {
       path: "/login",
       name: "login",
@@ -35,6 +40,11 @@ const router = createRouter({
       name: "tour",
       props: true,
       component: TourDetailView,
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      component: ProfileView,
     },
   ],
 });
