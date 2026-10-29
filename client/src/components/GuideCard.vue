@@ -8,7 +8,7 @@ const props = defineProps<{ guide: Guide }>();
 <template>
   <div>
     <h3>
-      <RouterLink :to="`/guider/${props.guide.slug}`">{{
+      <RouterLink :to="{ name: 'guide', params: { slug: props.guide.slug } }">{{
         props.guide.title
       }}</RouterLink>
     </h3>
