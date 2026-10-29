@@ -262,7 +262,7 @@ Required checks:
 
 ### B1:
 
-Innan vi tog bort `/web` tog `npm ci` steget i `Kvalitet` jobbet 6s.
+Innan vi tog bort `/web` tog `npm ci` steget i `Kvalitet` jobbet 8s, och 6s efter.
 
 ### B2:
 
