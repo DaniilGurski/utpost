@@ -76,7 +76,7 @@ Loggpunkter och foton **bäddas in** eftersom de alltid läses tillsammans med t
 | `{ tour_id: 1 }`, unique | `GET /tours/:id`, och verifiering av migreringen |
 | `{ started_at: -1 }`     | `GET /tours` (nyaste först)                      |
 
-Inget index på `user_id` eller `guide_id` än: ingen skärm frågar efter "alla turer för den här användaren". Det läggs till den dag en sådan skärm byggs.
+Inget index på `user_id` eller `guide_id` än. Sedan M6 listar profilsidan användarens egna turer, men den hämtar `tours(limit: 200)` och filtrerar i klienten, så användare med turer utanför de 200 senaste får en ofullständig lista. Ett `user_id`-index och ett filter i schemat är kända skulder.
 
 **Lista mot detalj:** `GET /tours` använder en projektion utan `logs` (titel, datum, `stats`, namn-ögonblicksbilder). `GET /tours/:id` returnerar hela dokumentet. Det är den stora vinsten, och den kommer av modellen plus projektionen.
 
@@ -131,5 +131,6 @@ Inget index på `user_id` eller `guide_id` än: ingen skärm frågar efter "alla
 - **Kod:** `TOURS_SOURCE`-flaggan lägger en liten gren i tur-routerna. Den tas bort när vi är säkra på Mongo.
 - **Frysta Postgres-tabeller** kostar lagring och kan förvirra. Vi accepterar det som priset för att kunna backa.
 - Namn-ögonblicksbilden kan bli inaktuell, se dokumentmodellen.
+- **`tour_logs` efter M6:** ingen klient läser tabellen längre (GraphQL läser loggpunkterna ur Mongo, bara REST-routerna `GET /api/tours` och `/api/tours/:id` läser den). Den behålls fryst som reträtt för `TOURS_SOURCE=postgres`, och REST-routerna lämnas orörda.
 
 **Skrivet av:** Daniil Gurski

@@ -260,6 +260,10 @@ Required checks:
 
 ## Konfiguration och hemligheter (M6)
 
+### B1:
+
+Innan vi tog bort `/web` tog `npm ci` steget i `Kvalitet` jobbet 8s, och 6s efter.
+
 ### B2:
 
 nginx-mallen `client/nginx.conf.template` har raden `proxy_pass http://${API_UPSTREAM};` (för både `/api/` och `/graphql`). Värdet kommer från `API_UPSTREAM`:
@@ -281,7 +285,7 @@ docker compose exec client grep proxy_pass /etc/nginx/conf.d/default.conf
 
 ### B3:
 
-Den gamla JWT-hemligheten låg hårdkodad i `api/src/config.js` och är bränd. Nu läses den från `JWT_SECRET`, och standardvärdet i koden är ett dev-värde som bara används på våra egna maskiner.
+Den gamla JWT-secret låg hårdkodad i `api/src/config.js` och är bränd. Nu läses den från `JWT_SECRET`, och standardvärdet i koden är ett dev-värde som bara används på våra egna maskiner.
 
 ```
 git log --oneline -S 'utpost-super-secret'

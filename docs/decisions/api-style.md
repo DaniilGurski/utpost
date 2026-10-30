@@ -71,14 +71,15 @@ Medvetet utanför schemat:
 
 _Endpoint för endpoint eller vy för vy. Inloggning? Bilduppladdning? Health? Motivera varje rad._
 
-| Vy / endpoint                   | Stil    | Varför                                                                                                                                             |
-| ------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Turlistan (`ToursView`)         | GraphQL | Störst vinst: 2,4 % av REST-svaret. Nästlad data (användare, guide, bilder) per tur.                                                               |
-| Turdetalj (`TourDetailView`)    | REST    | M4 krävde en flyttad vy. `tour(id)` finns redan i schemat, så vyn kan flyttas senare.                                                              |
-| Startsidan och guider           | REST    | Mätt i GraphQL men inte flyttad: bara ~27 % mindre, eftersom `bodyHtml` skickas i sin helhet. Kräver ett utdragsfält (och `lengthKm`) först. |
-| Inloggning (`routes/auth.js`)   | REST    | En POST med lite data som returnerar en token. GraphQL tillför inget.                                                                              |
-| Bilduppladdning (`photos.js`)   | REST    | Filuppladdning är enkel med multipart i REST; GraphQL saknar ett standardsätt.                                                                     |
-| Health                          | REST    | Datan visas aldrig för användaren. Används av drift, inte av vyer.                                                                                 |
+| Vy / endpoint                            | Stil    | Varför                                                                                                                                                                                                           |
+| ---------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turlistan (`ToursView`)                  | GraphQL | Störst vinst: 2,4 % av REST-svaret. Nästlad data (användare, guide, bilder) per tur.                                                                                                                             |
+| Turdetalj (`TourDetailView`)             | GraphQL | `tour(id)` med loggpunkterna, som läses ur Mongo.                                                                                                                                                                |
+| Profil (`ProfileView`)                   | GraphQL | Egna turer: `tours(limit: 200)` filtreras på användaren i klienten, eftersom schemat inte kan filtrera på användare. Namn, e-post och roll kommer ur sessionen.                                                  |
+| Guider (`GuidesView`, `GuideDetailView`) | REST    | Mätt i GraphQL men inte flyttad: bara ~27 % mindre, eftersom `bodyHtml` skickas i sin helhet. Kräver ett utdragsfält (och `lengthKm`) först. Startsidan portades inte till Vue i M6, `/` skickas till `/guides`. |
+| Inloggning (`routes/auth.js`)            | REST    | En POST med lite data som returnerar en token. GraphQL tillför inget.                                                                                                                                            |
+| Bilduppladdning (`photos.js`)            | REST    | Filuppladdning är enkel med multipart i REST; GraphQL saknar ett standardsätt.                                                                                                                                   |
+| Health                                   | REST    | Datan visas aldrig för användaren. Används av drift, inte av vyer.                                                                                                                                               |
 
 ## Alternativ vi jämförde
 

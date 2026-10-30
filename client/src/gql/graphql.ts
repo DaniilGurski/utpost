@@ -8,6 +8,12 @@ export type Incremental<T> =
       [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
     };
 import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+export type MinaTurerQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MinaTurerQuery = {
+  tours: Array<{ id: string; title: string; user: { id: string } }>;
+};
+
 export type TourDetailsQueryVariables = Exact<{
   id: string | number;
 }>;
@@ -38,6 +44,49 @@ export type TurerQuery = {
   }>;
 };
 
+export const MinaTurerDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "MinaTurer" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "tours" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "limit" },
+                value: { kind: "IntValue", value: "200" },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "user" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MinaTurerQuery, MinaTurerQueryVariables>;
 export const TourDetailsDocument = {
   kind: "Document",
   definitions: [
