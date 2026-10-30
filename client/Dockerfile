@@ -18,7 +18,8 @@ RUN npm run build --workspace=client
 # Steg 2 – det som blir imagen: nginx och de färdiga filerna. Inget Node, inga node_modules,
 # ingen källkod. Allt från steg 1 som inte kopieras hit kastas.
 FROM nginx:1.27-alpine
-COPY client/ngnix.conf /etc/nginx/conf.d/default.conf
+ENV API_UPSTREAM=api:4000
+COPY client/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/client/dist /usr/share/nginx/html
 
 EXPOSE 80
