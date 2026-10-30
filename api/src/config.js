@@ -7,5 +7,6 @@ export const config = {
     process.env.MONGO_URL ?? "mongodb://localhost:27017/?authSource=admin",
   jwtSecret: process.env.JWT_SECRET ?? "utpost-dev-secret",
   port: Number(process.env.PORT ?? 4000),
+  gitSha: process.env.GIT_SHA ?? "dev",
   uploadDir: "./uploads",
 };

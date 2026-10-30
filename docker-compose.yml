@@ -49,6 +49,8 @@ services:
     build:
       context: .
       dockerfile: client/Dockerfile
+    depends_on:
+      - api
     ports:
       - "3001:80"
 

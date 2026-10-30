@@ -16,6 +16,9 @@ COPY api/ api/
 
 WORKDIR /app/api
 
+ARG GIT_SHA=dev
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 4000
 
 CMD ["node", "src/index.js"]

@@ -258,6 +258,27 @@ Required checks:
 - Build
 - Image
 
+## Konfiguration och hemligheter (M6)
+
+### B2:
+
+nginx-mallen `client/nginx.conf.template` har raden `proxy_pass http://${API_UPSTREAM};` (för både `/api/` och `/graphql`). Värdet kommer från `API_UPSTREAM`:
+
+| Miljö   | `API_UPSTREAM`   | Var det sätts                                   | Resultat i `default.conf`           |
+| ------- | ---------------- | ----------------------------------------------- | ----------------------------------- |
+| Compose | `api:4000`       | `docker-compose.yml`, tjänsten `client`         | `proxy_pass http://api:4000;`       |
+| Azure   | `localhost:4000` | `infra/azure/staging.yaml`, containern `client` | `proxy_pass http://localhost:4000;` |
+
+I Azure kör api som sidecar i samma app och delar `localhost` med client. I compose är `api` tjänstnamnet i nätverket.
+
+Kontroll i compose:
+
+```
+docker compose exec client grep proxy_pass /etc/nginx/conf.d/default.conf
+    proxy_pass http://api:4000;
+    proxy_pass http://api:4000;
+```
+
 ## Deploy
 
 Fråga Marcus.
