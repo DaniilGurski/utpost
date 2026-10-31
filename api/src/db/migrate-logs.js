@@ -1,5 +1,6 @@
 import { pool } from "./client.js";
 import { mongoClient, toursCollection } from "./mongo.js";
+import { pathToFileURL } from "node:url";
 
 // Flyttar turloggarna till MongoDB (beslutet från M3): ett dokument per tur,
 // med loggpunkterna inbäddade i `logs`. Samma dokumentform som mongo-smoke.js.
@@ -80,9 +81,11 @@ export const run = async () => {
   console.log("Verifierat");
 };
 
-run()
-  .catch((err) => {
-    console.error(err.message);
-    process.exitCode = 1;
-  })
-  .finally(() => Promise.all([pool.end(), mongoClient.close()]));
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  run()
+    .catch((err) => {
+      console.error(err.message);
+      process.exitCode = 1;
+    })
+    .finally(() => Promise.all([pool.end(), mongoClient.close()]));
+}
