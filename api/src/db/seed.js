@@ -151,12 +151,13 @@ export const run = async () => {
   console.log(
     `Seed klar: 12 användare, 40 guider, 200 turer, ${logCount} loggpunkter.`,
   );
-  await pool.end();
 };
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  run().catch((err) => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+  run()
+    .catch((err) => {
+      console.error(err);
+      process.exitCode = 1;
+    })
+    .finally(() => pool.end());
 }
