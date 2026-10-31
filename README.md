@@ -303,25 +303,30 @@ Värdet i Azure skapas av `infra/azure/create-staging.sh` med `openssl rand -hex
 
 ```
 curl -s https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io/api/health
-
-{"postgres":"ok","mongodb":"ok","sha":"e6f2589af40074d705705235b4d0f845780f354d"}
+{"postgres":"ok","mongodb":"ok","sha":"d1a6778f8ecdbb7d5222c28fb0b3eaa9882e507f"}
 
 git rev-parse main
-e6f2589af40074d705705235b4d0f845780f354d
+d1a6778f8ecdbb7d5222c28fb0b3eaa9882e507f
 ```
 
 ### B5:
 
 Staging: https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io
 
-boot:
-
 ```
-{"TimeStamp": "2026-10-31T14:51:26.82183", "Log": "Connecting to the container 'api'..."}
-{"TimeStamp": "2026-10-31T14:51:26.90667", "Log": "Successfully Connected to container: 'api' [Revision: 'utpost-staging--0000001', Replica: 'utpost-staging--0000001-7867c8b7d4-mm7rl']"}
-{"TimeStamp": "2026-10-31T14:48:54.1719363+00:00", "Log": "F boot: 12 anv\u00e4ndare finns redan - ingen seed"}
-{"TimeStamp": "2026-10-31T14:48:55.1582082+00:00", "Log": "F REST listening: http://localhost:4000"}
-{"TimeStamp": "2026-10-31T14:48:55.1582521+00:00", "Log": "F GraphQL listening: http://localhost:4000/graphql"}
+az containerapp logs show --name $APP --resource-group $RG --container api --tail 30
+{"TimeStamp": "2026-10-31T18:24:50.02143", "Log": "Connecting to the container 'api'..."}
+{"TimeStamp": "2026-10-31T18:24:50.17498", "Log": "Successfully Connected to container: 'api' [Revision: 'utpost-staging--0000003', Replica: 'utpost-staging--0000003-7d965f5f98-ps8z8']"}
+{"TimeStamp": "2026-10-31T18:16:32.4169665+00:00", "Log": "F boot: v\u00e4ntar p\u00e5 Postgres (1/30): connect ECONNREFUSED 127.0.0.1:5432"}
+{"TimeStamp": "2026-10-31T18:16:34.420722+00:00", "Log": "F boot: v\u00e4ntar p\u00e5 Postgres (2/30): connect ECONNREFUSED 127.0.0.1:5432"}
+{"TimeStamp": "2026-10-31T18:16:36.4619283+00:00", "Log": "F boot: tom databas - seedar"}
+{"TimeStamp": "2026-10-31T18:16:37.7119216+00:00", "Log": "F Seed klar: 12 anv\u00e4ndare, 40 guider, 200 turer, 5799 loggpunkter."}
+{"TimeStamp": "2026-10-31T18:16:38.0870524+00:00", "Log": "F Postgres: 200 turer, 5799 rader i tour_logs"}
+{"TimeStamp": "2026-10-31T18:16:38.0871048+00:00", "Log": "F MongoDB: 200 nya dokument, 0 ersatta"}
+{"TimeStamp": "2026-10-31T18:16:38.0929462+00:00", "Log": "F MongoDB: 200 dokument, 5799 loggpunkter i tours-samlingen"}
+{"TimeStamp": "2026-10-31T18:16:38.0929799+00:00", "Log": "F Verifierat"}
+{"TimeStamp": "2026-10-31T18:16:38.9908376+00:00", "Log": "F REST listening: http://localhost:4000"}
+{"TimeStamp": "2026-10-31T18:16:38.9908803+00:00", "Log": "F GraphQL listening: http://localhost:4000/graphql"}
 ```
 
 ## Deploy
