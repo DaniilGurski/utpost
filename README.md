@@ -297,6 +297,33 @@ git log --oneline -S 'utpost-super-secret'
 
 Värdet i Azure skapas av `infra/azure/create-staging.sh` med `openssl rand -hex 32` och sparas bara som secret (`jwt-secret`) i Container Appen, som api-containern läser som `JWT_SECRET`.
 
+## I molnet (M6)
+
+### B4:
+
+```
+curl -s https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io/api/health
+
+{"postgres":"ok","mongodb":"ok","sha":"e6f2589af40074d705705235b4d0f845780f354d"}
+
+git rev-parse main
+e6f2589af40074d705705235b4d0f845780f354d
+```
+
+### B5:
+
+Staging: https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io
+
+boot:
+
+```
+{"TimeStamp": "2026-10-31T14:51:26.82183", "Log": "Connecting to the container 'api'..."}
+{"TimeStamp": "2026-10-31T14:51:26.90667", "Log": "Successfully Connected to container: 'api' [Revision: 'utpost-staging--0000001', Replica: 'utpost-staging--0000001-7867c8b7d4-mm7rl']"}
+{"TimeStamp": "2026-10-31T14:48:54.1719363+00:00", "Log": "F boot: 12 anv\u00e4ndare finns redan - ingen seed"}
+{"TimeStamp": "2026-10-31T14:48:55.1582082+00:00", "Log": "F REST listening: http://localhost:4000"}
+{"TimeStamp": "2026-10-31T14:48:55.1582521+00:00", "Log": "F GraphQL listening: http://localhost:4000/graphql"}
+```
+
 ## Deploy
 
 Fråga Marcus.
