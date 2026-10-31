@@ -1,4 +1,4 @@
-// M6: startpunkten i imagen (CMD i api/Dockerfile). Lokalt med npm run dev startar index.js direkt.
+// M6: sdocker compose exec client cat /etc/nginx/conf.d/default.conftartpunkten i imagen (CMD i api/Dockerfile). Lokalt med npm run dev startar index.js direkt.
 //
 // I molnet kör Postgres och mongoClient som sidecars bredvid API:et, utan volym: varje gång appen
 // väcks från noll replicas är databasen tom. Med SEED_ON_START=1 väntar vi in Postgres,

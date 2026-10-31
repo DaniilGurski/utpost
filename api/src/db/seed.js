@@ -1,5 +1,6 @@
 import { pool } from "./client.js";
 import { createTables } from "./migrate.js";
+import { pathToFileURL } from "node:url";
 
 const REGIONS = [
   "Jämtland",
@@ -153,7 +154,9 @@ export const run = async () => {
   await pool.end();
 };
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  run().catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}
