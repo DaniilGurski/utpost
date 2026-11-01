@@ -1,7 +1,7 @@
-// M6: sdocker compose exec client cat /etc/nginx/conf.d/default.conftartpunkten i imagen (CMD i api/Dockerfile). Lokalt med npm run dev startar index.js direkt.
+// M6: startpunkten i imagen (CMD i api/Dockerfile). Lokalt med npm run dev startar index.js direkt.
 //
 // I molnet kör Postgres och mongoClient som sidecars bredvid API:et, utan volym: varje gång appen
-// väcks från noll replicas är databasen tom. Med SEED_ON_START=1 väntar vi in Postgres,
+// väcks från noll replicas är databasen tom. Med SEED_ON_START=1 väntar vi in Postgres och MongoDB,
 // seedar om users är tom, kör migrate:logs, och startar sedan servern. Utan variabeln gör
 // filen ingenting mer än att starta index.js – så compose och pipelinen beter sig som förut.
 import { pool } from "./db/client.js";
@@ -26,6 +26,19 @@ const waitForPostgres = async (attempts = 30) => {
   throw new Error("boot: Postgres svarade inte");
 };
 
+const waitForMongo = async (attempts = 30) => {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      await mongoClient.connect();
+      return;
+    } catch (err) {
+      console.log(`boot: väntar på MongoDB (${i}/${attempts}): ${err.message}`);
+      await sleep(2000);
+    }
+  }
+  throw new Error("boot: MongoDB svarade inte");
+};
+
 const seedIfEmpty = async () => {
   let users = 0;
   try {
@@ -41,12 +54,12 @@ const seedIfEmpty = async () => {
   }
   console.log("boot: tom databas - seedar");
   await seed();
-  await mongoClient.connect();
   await migrateLogs();
 };
 
 if (process.env.SEED_ON_START === "1") {
   await waitForPostgres();
+  await waitForMongo();
   await seedIfEmpty();
 }
 
