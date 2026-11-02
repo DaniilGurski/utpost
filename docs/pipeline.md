@@ -90,6 +90,7 @@ Jobbet kör integrationstesterna i `api/` (`npm run test:api`) mot riktiga datab
 | Integration  | API:et mot riktiga databaser: N+1, inloggningskrav, migrerade loggar           |
 | build        | Trasiga importer och byggfel som lint och test kan missa                       |
 | Image        | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                |
+| Deploy       | Att en merge inte når staging, fel sha i molnet, trasig proxy eller databas    |
 | Ruleset      | Att inget mergas utan PR, review och gröna checks                              |
 
 ## Uppmätta tider (en körning)
@@ -131,3 +132,26 @@ Bekräfta uppgifterna med den som ställt in rulesetet:
 - Required status checks: `Kvalitet`, `Integration`, `Bygg` och `Image`
 - Branchen som mergas behöver vara up to date med main
 - Blockera force push
+
+## M6: bevis
+
+### B1: `web/` bort
+
+| Körning                  | `npm ci` i `Kvalitet` |
+| ------------------------ | --------------------- |
+| Före (`web/` kvar)       | 8s                    |
+| Efter (`web/` borttagen) | 6s                    |
+
+Alla sidor i `web/` (Home, Login, Guides, GuideDetail, Tours, TourDetail, Profile) fanns redan i `client/` (routerna `/`, `/login`, `/guides`, `/guide/:slug`, `/tours`, `/tour/:id`, `/profile`), så inget behövde portas.
+
+### B6: `Deploy → Azure staging`
+
+- Körning på `main`, `Deploy` grön (merge av #150, `f15e7da`): https://github.com/DaniilGurski/utpost/actions/runs/41302135442
+- PR-körning, `Deploy` överhoppad, övriga fyra gröna: https://github.com/DaniilGurski/utpost/actions/runs/41298458483
+- Jobbtid `Deploy → Azure staging`: 1 min 34 s (11:31:47 → 11:33:21 UTC)
+- Revision efter deployen: `utpost-staging--sha-f15e7da` (mellanrevisionen med ny api och gammal client heter `utpost-staging--sha-f15e7da-api`)
+
+```
+✅ https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io kör f15e7da70e925266ff354c251b4ad27227aa0670 (revision utpost-staging--sha-f15e7da)
+✅ /graphql svarar via nginx, med data ur en seedad databas
+```

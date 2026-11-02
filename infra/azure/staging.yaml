@@ -4,7 +4,7 @@
 # Varför så här i staging: gratiskvoten räknas per prenumeration, och appen får skala till noll
 # mellan passen. Databaserna har ingen volym – varje kallstart ger en tom databas som api:et
 # seedar själv (SEED_ON_START=1). I produktion byts postgres/mongo mot managed databaser
-# (Azure Database for PostgreSQL, Cosmos DB for MongoDB) – det är beslutet i docs/decisions/hosting.md.
+# (Neon för Postgres, MongoDB Atlas) – det är beslutet i docs/decisions/hosting.md.
 #
 # Används av infra/azure/create-staging.sh: platshållarna __…__ byts ut innan filen skickas till
 # az containerapp create --yaml. Pipelinen rör aldrig den här filen: den byter bara image med
@@ -80,5 +80,5 @@ properties:
           - name: MONGO_INITDB_ROOT_PASSWORD
             secretRef: db-password
     scale:
-      minReplicas: 0           # skalar till noll mellan passen – kostar inget, men första anropet väcker allt (~1 min)
+      minReplicas: 0           # skalar till noll mellan passen – kostar inget, men första anropet väcker allt (~30 s)
       maxReplicas: 1           # en replica: databaserna lever i den
