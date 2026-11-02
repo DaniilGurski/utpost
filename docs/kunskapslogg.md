@@ -245,11 +245,17 @@ Nej.
 
 Cloud 1:
 
+Hela Utpost flyttas till molnet (Azure Container Apps) och där hämtas färdiga images efter att pipelinen byggt dem. Ett deploy-jobb lades till i pipelinen (yaml-filen) och det behöver image och integration eftersom man inte kan deploya kod med röda tester. Deployjobb körs bara när man mergar till main, inte vid varje PR eftersom det då ännu är oprövad kod. Versionen vi kör skalar till noll när appen inte är aktiv för att den då inte kostar något. Priset att betala för det är då att nästa anrop seedar om databaserna från noll (kallstart) vilket kostar tid för en användare.
+
 ### Var det syns i mitt arbete
 
 Cloud 1:
 
+.github/workflows/ci.yml
+
 ### Kvar att förstå
+
+Hur man mäter kostnaden för appen i azure och hur man här skiljer mellan staging och produktion.
 
 ### Siktar på VG
 
