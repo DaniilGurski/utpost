@@ -81,7 +81,7 @@ Använd en ny e-postadress varje gång, registreringen saknar felhantering för 
 - `api/` – Express + Postgres (Drizzle)
 - `client/` – Vue + Vite, den nya appen på http://localhost:3001. Det är här du jobbar.
 - `shared/` – `@utpost/shared`, delade TypeScript-typer (API-kontraktet) som både `api` och `client` importerar
-- `web/` – React + Vite, den gamla appen som ska översättas till Vue
+- `infra/azure/` – staging i Azure Container Apps (se [Deploy](#deploy))
 
 ## Arbetssätt
 
@@ -119,14 +119,14 @@ Brancher ska vara korta: små PR:er mergas snabbt, så vi får färre konflikter
 
 ## Workspaces
 
-Repot är ett npm-workspace med `api`, `web`, `client` och `shared`. Alla paket delar en `node_modules` och en `package-lock.json` i roten.
+Repot är ett npm-workspace med `api`, `client` och `shared`. Alla paket delar en `node_modules` och en `package-lock.json` i roten.
 
 - Kör `npm install` bara i roten, aldrig inne i en workspace-mapp. Annars riskerar vi en extra lockfil.
 - Scripten för `client` (lint, test, format) körs direkt från roten, du behöver inte ange workspace.
 - Lägg till ett beroende i en workspace med `--workspace` (eller `-w`):
   `npm install <paket> -w client` (`-D` för dev-beroenden)
-- Övriga scripts i en workspace: `npm run <script> -w <api|web|client>`.
-- Genvägar i roten: `npm run dev:client`, `npm run dev:api`, `npm run dev:web`.
+- Övriga scripts i en workspace: `npm run <script> -w <api|client>`.
+- Genvägar i roten: `npm run dev:client`, `npm run dev:api`.
 
 ### Lint (ESLint)
 
@@ -262,7 +262,7 @@ Required checks:
 
 ### B1:
 
-Innan vi tog bort `/web` tog `npm ci` steget i `Kvalitet` jobbet 8s, och 6s efter.
+`npm ci`-tiden före och efter att `web/` togs bort finns i [`docs/pipeline.md`](docs/pipeline.md#b1-web-bort).
 
 ### B2:
 
@@ -289,11 +289,12 @@ Den gamla JWT-secret låg hårdkodad i `api/src/config.js` och är bränd. Nu l�
 
 ```
 git log --oneline -S 'utpost-super-secret'
+65be1bf docs: add b3 for m6
 1f35a64 feat: create mongo client
 4a92f71 Initial commit
 ```
 
-`4a92f71` lade till värdet och `1f35a64` tog bort det.
+`4a92f71` lade till värdet och `1f35a64` tog bort det ur koden. `65be1bf` är README:n själv, som citerar strängen i kommandot ovan. Ingen kod använder värdet.
 
 Värdet i Azure skapas av `infra/azure/create-staging.sh` med `openssl rand -hex 32` och sparas bara som secret (`jwt-secret`) i Container Appen, som api-containern läser som `JWT_SECRET`.
 
@@ -331,4 +332,40 @@ az containerapp logs show --name $APP --resource-group $RG --container api --tai
 
 ## Deploy
 
-Fråga Marcus.
+Staging: https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io
+
+### Automatiskt vid merge
+
+Varje merge till `main` kör jobbet `Deploy → Azure staging` sist i `.github/workflows/ci.yml`. Det byter image på `api` och `client` till commitens tagg (`sha-<7 tecken>`), väntar tills `/api/health` svarar med samma sha och röktestar `/graphql` genom nginx. Vi bygger och pushar aldrig images från egen dator. Jobbet beskrivs i [`docs/pipeline.md`](docs/pipeline.md), och varför vi valde Azure i [`docs/decisions/hosting.md`](docs/decisions/hosting.md).
+
+### Vilken commit kör?
+
+```bash
+curl -s https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontainerapps.io/api/health
+git rev-parse main   # ska vara samma som "sha"
+```
+
+Appen skalar till noll mellan passen. Första anropet efter en paus tar ca 30 s, och nginx svarar 502 tills api:et är uppe. Databaserna är tomma efter varje kallstart och seedas om (`SEED_ON_START=1`).
+
+### Rollback
+
+Kräver `az`-inloggning med åtkomst till resursgruppen. Kör en äldre image (taggen finns i GHCR):
+
+```bash
+az containerapp update --name utpost-staging --resource-group $RG \
+  --container-name api --image ghcr.io/daniilgurski/utpost-api:sha-<förra> \
+  --revision-suffix rollback-1
+```
+
+Gör samma sak för `client` (`utpost-client`) om klienten också ska tillbaka. Nästa merge till `main` tar staging framåt igen. Ett suffix går bara att använda en gång, så nästa rollback blir `rollback-2`.
+
+### Sätta upp staging från början
+
+Bara för den som har Azure-åtkomst, och behövs bara om appen är borta:
+
+```bash
+SHA=$(git rev-parse main) ./infra/azure/create-staging.sh   # appen ur staging.yaml + nya secrets
+./infra/azure/identity.sh                                    # OIDC för GitHub, skriver ut variablerna
+```
+
+`identity.sh` skriver ut kommandon som skapar GitHub-miljön `azure-staging` med sex variabler. Det finns inga secrets i GitHub: jobbet loggar in med OIDC.
