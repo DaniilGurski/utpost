@@ -1,13 +1,14 @@
 # Kunskapslog
 
-| Kursmål                  | Post i vecka | Var det syns i mitt arbete                                                  | Siktar på VG |
-| ------------------------ | ------------ | --------------------------------------------------------------------------- | ------------ |
-| Fullstack 4              | V38          | PR #16, `README.md`, `.github/`                                             | -            |
-| Fullstack 5 · Cloud 3    | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml`                      | -            |
-| Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60 | -            |
-| Fullstack 1 · Cloud 4    | V41          | PR #83, PR #87 `docs/database.md`, PR #90 `README.md`, PR #92               | -            |
-| Fullstack 2              | V42          | PR #97, PR #99, PR #111, PR #114 `docs/decisions/api-stil.md`               | -            |
-| Fullstack 2 · Cloud 6    | V43          | PR #118, PR #119, PR #120, PR #122/#125, PR #124, PR #133, `README.md`      | -            |
+| Kursmål                  | Post i vecka | Var det syns i mitt arbete                                                        | Siktar på VG |
+| ------------------------ | ------------ | --------------------------------------------------------------------------------- | ------------ |
+| Fullstack 4              | V38          | PR #16, `README.md`, `.github/`                                                   | -            |
+| Fullstack 5 · Cloud 3    | V39          | PR #32, `README.md` PR #34, `.github/workflows/ci.yml`                            | -            |
+| Fullstack 3 · Cloud 5, 6 | V40          | PR #48, PR #68, `docs/testing.md` PR #74, `.github/workflows/ci.yml` PR #60       | -            |
+| Fullstack 1 · Cloud 4    | V41          | PR #83, PR #87 `docs/decisions/database.md`, PR #90 `README.md`, PR #92           | -            |
+| Fullstack 2              | V42          | PR #97, PR #99, PR #111, PR #114 `docs/decisions/api-style.md`                    | -            |
+| Fullstack 2 · Cloud 6    | V43          | PR #118, PR #119, PR #120, PR #122/#125, PR #124, PR #133, `README.md`            | -            |
+| Cloud 1                  | V44          | PR #141, PR #142, PR #144, PR #145, PR #152, PR #153, `docs/decisions/hosting.md` | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -111,7 +112,7 @@ Cloud 4:
 
 ### Var det syns i mitt arbete
 
-Fullstack 1: PR #83 (`api/src/db/mongo.js`, health check, `mongo:smoke`), PR #87 (`docs/database.md`)
+Fullstack 1: PR #83 (`api/src/db/mongo.js`, health check, `mongo:smoke`), PR #87 (`docs/decisions/database.md`)
 Cloud 4: PR #83 (Mongo-tjänsten i compose), PR #90 (`README.md`), PR #92 (databasadresser i compose)
 
 ### Kvar att förstå
@@ -138,7 +139,7 @@ Fullstack 2:
 
 ### Var det syns i mitt arbete
 
-Fullstack 2: PR #97 (grund), PR #99 (resolvers, N+1-loggning), PR #111 (mutation, auth), PR #114 (`docs/decisions/api-stil.md`)
+Fullstack 2: PR #97 (grund), PR #99 (resolvers, N+1-loggning), PR #111 (mutation, auth), PR #114 (`docs/decisions/api-style.md`)
 
 ### Kvar att förstå
 
@@ -173,6 +174,29 @@ Cloud 6: PR #122/#125 (integrationstester), PR #124 (integrationsjobb), `README.
 ### Kvar att förstå
 
 Inget just nu.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 44 – Hosting och moln
+
+**Kursmål:** Cloud 1
+
+### Vad jag förstått
+
+Cloud 1:
+
+- Azure Container Apps: appen körs som en containerapp med fyra containrar (client, api, postgres, mongo) som sidecars, där bara client har ingress utåt. Den skalar till noll, och kallstarten mättes till ca 29 s
+- OIDC mot Azure utan lösenord i GitHub: identiteten litar på miljön `azure-staging`, och GitHub har bara variabler på miljön, inga secrets
+
+### Var det syns i mitt arbete
+
+Cloud 1: PR #141 (konfiguration från miljön), PR #142 (`boot.js`, sha i `/api/health`), PR #144 (JWT-hemligheten ur koden och roterad), PR #145 (`web/` bort), PR #149/#151 (bootfix), PR #152 (`infra/azure/identity.sh`, bevis i `README.md`), PR #153 (`docs/decisions/hosting.md`, `README.md`)
+
+### Kvar att förstå
+
+Hur produktionsdatabaserna (Neon och MongoDB Atlas) kopplas in när sidecars försvinner.
 
 ### Siktar på VG
 
