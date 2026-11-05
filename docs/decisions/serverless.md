@@ -23,9 +23,35 @@
 
 | Mätning | Uppladdning p50 | Uppladdning max | Health p50 | Health max | Total tid |
 |---|---|---|---|---|---|
-| Före, lokalt (N = ) | | | | | |
-| Efter, lokalt (N = ) | | | | | |
+| Före, lokalt (N = 10) | 1626 ms | 1634 ms | 728 ms | 1447 ms | 1638 ms |
+| Efter, lokalt (N = 10) | 1596 ms | 1608 ms | 5 ms | 24 ms | 1608 ms |
 | Efter, staging (N = ) | | | | | |
+
+N = 10 är skriptets standardvärde och gav en tydlig skillnad, så `--n 20` behövdes inte. Båda körningarna gjordes på samma dator med 4000x3000 och `npm run dev:api`. Efter-körningen gick mot `func start`.
+
+Före, hela utskriften:
+
+| Vad | p50 | max | |
+|---|---|---|---|
+| Uppladdning (POST /api/photos) | 1626 ms | 1634 ms | 10/10 ok |
+| Health (GET /api/health) | 728 ms | 1447 ms | 15 anrop |
+| processingMs (bildarbetet) | 120 ms | 166 ms | |
+| apiMs (API:ets totala tid) | – | – | saknas i svaret (före) |
+
+Total tid: 1638 ms · kallstarter i svaren: 0
+
+Efter, hela utskriften:
+
+| Vad | p50 | max | |
+|---|---|---|---|
+| Uppladdning (POST /api/photos) | 1596 ms | 1608 ms | 10/10 ok |
+| Health (GET /api/health) | 5 ms | 24 ms | 15 anrop |
+| processingMs (bildarbetet) | 72 ms | 88 ms | |
+| apiMs (API:ets totala tid) | 1545 ms | 1554 ms | |
+
+Total tid: 1608 ms · kallstarter i svaren: 1
+
+Health max gick från 1447 ms till 24 ms: API:et svarar på andra anrop medan bilderna bearbetas. Uppladdningen blev däremot knappt snabbare. Lokalt kör `func start` en enda Node-process på samma dator, så de tio bilderna får fortfarande vänta på varandra. Arbetet har flyttat ut ur API:et men har inte blivit mindre.
 
 *Vad blev snabbare – och vad blev det inte? Varför?*
 
