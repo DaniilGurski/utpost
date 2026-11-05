@@ -8,4 +8,9 @@ export const config = {
   port: Number(process.env.PORT ?? 4000),
   gitSha: process.env.GIT_SHA ?? "dev",
   uploadDir: "./uploads",
+  // M7: || och inte ??, så att en tom rad i .env också ger den lokala adressen.
+  imageFunctionUrl:
+    process.env.IMAGE_FUNCTION_URL || "http://localhost:7071/api/process-image",
+  // Tom lokalt: func start kontrollerar ingen nyckel.
+  imageFunctionKey: process.env.IMAGE_FUNCTION_KEY ?? "",
 };
