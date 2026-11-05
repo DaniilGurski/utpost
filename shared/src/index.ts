@@ -63,4 +63,38 @@ type ApiError = {
   status: number | null;
 };
 
-export type { Guide, User, Tour, TourLog, Photo, AuthResponse, ApiError };
+// M7: POST /api/photos request
+type PhotoUploadRequest = {
+  tourId: number;
+  filename: string;
+  width: number;
+  height: number;
+};
+
+// M7: One processed image variant
+type PhotoVariant = {
+  size: number;
+  signature: string;
+};
+
+// M7: POST /api/photos response
+type PhotoUploadResponse = Photo & {
+  variants: PhotoVariant[];
+  processingMs: number;
+  coldStart: boolean;
+  instance: string;
+  apiMs: number;
+};
+
+export type {
+  Guide,
+  User,
+  Tour,
+  TourLog,
+  Photo,
+  AuthResponse,
+  ApiError,
+  PhotoUploadRequest,
+  PhotoVariant,
+  PhotoUploadResponse,
+};
