@@ -4,14 +4,18 @@
 # inget – den byter bara image i den app som finns (se .github/workflows/ci.yml, jobbet deploy).
 #
 #   az login
-#   REPO=<ägare>/<repo> SHA=<git-sha på main> ./infra/azure/create-staging.sh
+#   REPO=<ägare>/<repo> SHA=<git-sha på main> IMAGE_FUNCTION_URL=<url> IMAGE_FUNCTION_KEY=<nyckel> ./infra/azure/create-staging.sh
 #
 # Imagerna måste finnas i GHCR (jobbet Image på main): ghcr.io/<ägare>/<repo>-api:sha-<7 tecken>.
+# Funktionens URL och nyckel skriver infra/azure/skapa-funktion.sh ut. Finns staging redan kopplar det
+# skriptet appen självt (CONTAINER_APP=<appen>), så då behöver det här skriptet inte köras om.
 # Variablerna går att skriva över: RG, LOC, ENV_NAME, APP.
 set -euo pipefail
 
 : "${REPO:?Sätt REPO=<ägare>/<repo> (t.ex. jonatanhallenberg/utpost-cloud-labb)}"
 : "${SHA:?Sätt SHA=<hela git-sha:n på main som Image har publicerat>}"
+: "${IMAGE_FUNCTION_URL:?Sätt IMAGE_FUNCTION_URL=<funktionens url, se skapa-funktion.sh>}"
+: "${IMAGE_FUNCTION_KEY:?Sätt IMAGE_FUNCTION_KEY=<funktionsnyckeln, se skapa-funktion.sh>}"
 RG="${RG:-utpost-rg}"
 LOC="${LOC:-swedencentral}"
 ENV_NAME="${ENV_NAME:-utpost-env}"
@@ -40,10 +44,12 @@ TMP="$(mktemp)"
 sed -e "s|__LOCATION__|${LOC}|g" -e "s|__APP__|${APP}|g" -e "s|__RG__|${RG}|g" -e "s|__ENV_ID__|${ENV_ID}|g" \
     -e "s|__IMAGE_API__|${IMAGE_API}|g" -e "s|__IMAGE_CLIENT__|${IMAGE_CLIENT}|g" \
     -e "s|__JWT_SECRET__|${JWT_SECRET}|g" -e "s|__DB_PASSWORD__|${DB_PASSWORD}|g" \
+    -e "s|__IMAGE_FUNCTION_URL__|${IMAGE_FUNCTION_URL}|g" \
+    -e "s|__IMAGE_FUNCTION_KEY__|${IMAGE_FUNCTION_KEY}|g" \
     "$(dirname "$0")/staging.yaml" > "${TMP}"
 az containerapp create --resource-group "${RG}" --name "${APP}" --yaml "${TMP}" --output none
 rm -f "${TMP}"
-unset JWT_SECRET DB_PASSWORD
+unset JWT_SECRET DB_PASSWORD IMAGE_FUNCTION_KEY
 
 FQDN="$(az containerapp show --name "${APP}" --resource-group "${RG}" --query properties.configuration.ingress.fqdn --output tsv)"
 echo
