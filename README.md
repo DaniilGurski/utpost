@@ -336,7 +336,12 @@ Staging: https://utpost-staging.politeriver-7b4ab2c4.swedencentral.azurecontaine
 
 ### Automatiskt vid merge
 
-Varje merge till `main` kör jobbet `Deploy → Azure staging` sist i `.github/workflows/ci.yml`. Det byter image på `api` och `client` till commitens tagg (`sha-<7 tecken>`), väntar tills `/api/health` svarar med samma sha och röktestar `/graphql` genom nginx. Vi bygger och pushar aldrig images från egen dator. Jobbet beskrivs i [`docs/pipeline.md`](docs/pipeline.md), och varför vi valde Azure i [`docs/decisions/hosting.md`](docs/decisions/hosting.md).
+Varje merge till `main` kör två oberoende deployjobb sist i `.github/workflows/ci.yml`:
+
+- **`Deploy → Azure staging`** byter image på `api` och `client` till commitens tagg (`sha-<7 tecken>`), väntar tills `/api/health` svarar med samma sha och röktestar `/graphql` genom nginx. Vi bygger och pushar aldrig images från egen dator.
+- **`Deploy → Azure Functions`** (M7) lägger upp `functions/` i bildfunktionens function app och röktestar `process-image`. Appen skapades en gång för hand med `infra/azure/skapa-funktion.sh`. Jobbet skapar ingenting, det lägger bara upp ny kod i appen som variabeln `AZURE_FUNCTION_APP` på miljön `azure-staging` pekar ut. Funktionsnyckeln finns inte i GitHub: jobbet hämtar den ur Azure med sin OIDC-identitet och maskerar den i loggen.
+
+Jobben beskrivs i [`docs/pipeline.md`](docs/pipeline.md), och varför vi valde Azure i [`docs/decisions/hosting.md`](docs/decisions/hosting.md).
 
 ### Vilken commit kör?
 
@@ -369,3 +374,5 @@ SHA=$(git rev-parse main) ./infra/azure/create-staging.sh   # appen ur staging.y
 ```
 
 `identity.sh` skriver ut kommandon som skapar GitHub-miljön `azure-staging` med sex variabler. Det finns inga secrets i GitHub: jobbet loggar in med OIDC.
+
+Bildfunktionen skapas en gång med `REPO=<ägare>/<repo> RG=$RG CONTAINER_APP=utpost-staging ./infra/azure/skapa-funktion.sh`. Skriptet skriver ut kommandot som sätter den sjunde variabeln, `AZURE_FUNCTION_APP`, på `azure-staging`.
