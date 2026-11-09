@@ -262,6 +262,7 @@ jobs:
           echo "::add-mask::$KEY"
           # Flex-appar har fälten under properties (se skapa-funktion.sh) – därför båda.
           HOST=$(az functionapp show --name "$APP" --resource-group "$RG" --query "defaultHostName || properties.defaultHostName" --output tsv)
+          [ -n "$KEY" ] && [ -n "$HOST" ] || { echo "::error::Fick ingen nyckel eller inget värdnamn för $APP ur Azure"; exit 1; }
           URL="https://$HOST/api/process-image"
           # Första anropet efter en deploy är en kallstart – därav den generösa tidsgränsen.
           SVAR=$(curl -fsS --max-time 60 --retry 3 --retry-delay 5 --retry-all-errors -X POST "$URL" \
