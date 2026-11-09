@@ -91,6 +91,7 @@ Jobbet kör integrationstesterna i `api/` (`npm run test:api`) mot riktiga datab
 | build        | Trasiga importer och byggfel som lint och test kan missa                       |
 | Image        | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                |
 | Deploy       | Att en merge inte når staging, fel sha i molnet, trasig proxy eller databas    |
+| Deploy-fn    | Att bildfunktionen i Azure kör något annat än `main` eller inte svarar         |
 | Ruleset      | Att inget mergas utan PR, review och gröna checks                              |
 
 ## Uppmätta tider (en körning)
@@ -123,6 +124,14 @@ uppstart av runners och väntan mellan jobben)
 
 Jobbet kör parallellt med `Kvalitet`, så det förlänger pipelinen bara om det är det långsammaste spåret.
 
+### Jobbet `Deploy → Azure Functions` (M7)
+
+Körs bara på `main` (`needs: [quality]`). Jobbet installerar `functions/` med `npm ci --omit=dev`, loggar in med samma OIDC-identitet som `Deploy`, lägger upp paketet med `Azure/functions-action` (`respect-funcignore: true`) och röktestar `process-image`. Funktionsnyckeln finns inte i GitHub: jobbet hämtar den med `az functionapp keys list` och maskerar den (`::add-mask::`), så den syns som `***` i loggen.
+
+| Körning | Jobbtid                                                                |
+| ------- | ---------------------------------------------------------------------- |
+| `main`  | ca 1–2 min (fylls i efter första körningen; röktestet är en kallstart) |
+
 ## Ruleset på `main`
 
 Bekräfta uppgifterna med den som ställt in rulesetet:
@@ -132,6 +141,8 @@ Bekräfta uppgifterna med den som ställt in rulesetet:
 - Required status checks: `Kvalitet`, `Integration`, `Bygg` och `Image`
 - Branchen som mergas behöver vara up to date med main
 - Blockera force push
+
+`Deploy → Azure staging` och `Deploy → Azure Functions` är inga required checks: de körs bara på `main`, efter merge, och hoppas över på PR:er. De två deployjobben är oberoende av varandra. Funktionsjobbet väntar bara på `Kvalitet`, eftersom `functions/` är ett eget paket utan image. En röd funktionsdeploy stoppar alltså inte staging, och tvärtom.
 
 ## M6: bevis
 

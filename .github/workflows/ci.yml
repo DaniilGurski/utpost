@@ -211,3 +211,62 @@ jobs:
           echo "$SVAR"
           echo "$SVAR" | grep -q '"displayName"' || { echo "::error::GraphQL svarade utan data"; exit 1; }
           echo "✅ /graphql svarar via nginx, med data ur en seedad databas"
+
+  # M7: bildfunktionen. Appen skapades en gång med infra/azure/skapa-funktion.sh – jobbet lägger bara
+  # upp ny kod i den. Oberoende av deploy: functions/ är ett eget paket utan image.
+  deploy-function:
+    name: Deploy → Azure Functions
+    runs-on: ubuntu-latest
+    needs: [quality]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: azure-staging # samma miljö och identitet som deploy, plus AZURE_FUNCTION_APP
+    permissions:
+      id-token: write
+      contents: read
+    concurrency:
+      group: deploy-function
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      # Deploypaketet är functions/ som den står, med node_modules – bara det som behövs i drift.
+      - run: npm ci --omit=dev
+        working-directory: functions
+
+      - name: Logga in i Azure med GitHubs identitet (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Lägg upp functions/ i function appen
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTION_APP }}
+          package: functions
+          respect-funcignore: true # .funcignore håller local.settings.json och testerna utanför
+
+      - name: Röktest – process-image svarar med varianter
+        env:
+          RG: ${{ vars.AZURE_RG }}
+          APP: ${{ vars.AZURE_FUNCTION_APP }}
+        run: |
+          # Nyckeln finns inte i GitHub: identiteten hämtar den ur Azure, och den maskeras i loggen.
+          KEY=$(az functionapp keys list --name "$APP" --resource-group "$RG" --query functionKeys.default --output tsv)
+          echo "::add-mask::$KEY"
+          # Flex-appar har fälten under properties (se skapa-funktion.sh) – därför båda.
+          HOST=$(az functionapp show --name "$APP" --resource-group "$RG" --query "defaultHostName || properties.defaultHostName" --output tsv)
+          URL="https://$HOST/api/process-image"
+          # Första anropet efter en deploy är en kallstart – därav den generösa tidsgränsen.
+          SVAR=$(curl -fsS --max-time 60 --retry 3 --retry-delay 5 --retry-all-errors -X POST "$URL" \
+            -H "x-functions-key: $KEY" -H 'Content-Type: application/json' \
+            -d '{"filename":"rooktest.jpg","width":4000,"height":3000}')
+          echo "$SVAR"
+          echo "$SVAR" | grep -q '"variants"' || { echo "::error::process-image svarade utan variants"; exit 1; }
+          echo "✅ $URL svarar"
