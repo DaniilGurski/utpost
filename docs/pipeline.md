@@ -126,11 +126,17 @@ Jobbet kör parallellt med `Kvalitet`, så det förlänger pipelinen bara om det
 
 ### Jobbet `Deploy → Azure Functions` (M7)
 
-Körs bara på `main` (`needs: [quality]`). Jobbet installerar `functions/` med `npm ci --omit=dev`, loggar in med samma OIDC-identitet som `Deploy`, lägger upp paketet med `Azure/functions-action` (`respect-funcignore: true`) och röktestar `process-image`. Funktionsnyckeln finns inte i GitHub: jobbet hämtar den med `az functionapp keys list` och maskerar den (`::add-mask::`), så den syns som `***` i loggen.
+Körs bara på `main` (`needs: [quality]`). Jobbet installerar `functions/` med `npm ci --omit=dev`, loggar in med samma OIDC-identitet som `Deploy`, lägger upp paketet med `Azure/functions-action` (`respect-funcignore: true`) och röktestar `process-image`. Funktionsnyckeln finns inte i GitHub: jobbet hämtar den med `az functionapp keys list` och maskerar den (`::add-mask::`), så värdet aldrig skrivs ut i klartext: skulle det hamna i loggen står det `***`.
 
-| Körning | Jobbtid                                                                |
-| ------- | ---------------------------------------------------------------------- |
-| `main`  | ca 1–2 min (fylls i efter första körningen; röktestet är en kallstart) |
+| Körning | Jobbtid |
+| ------- | ------- |
+| `main`  | 45 s    |
+
+Körningen på `main` efter merge av #167: https://github.com/DaniilGurski/utpost/actions/runs/42659715323 (16:57:06 → 16:57:51 UTC). Röktestet var en kallstart (`"coldStart":true`) och tog ca 6 s av jobbtiden. Jobbet startar samtidigt som `Bygg`, så det förlänger inte pipelinen: `Deploy → Azure staging` är fortfarande sist.
+
+```
+✅ https://utpost-fn-daniil-douglas-cristian-garen-fn.azurewebsites.net/api/process-image svarar
+```
 
 ## Ruleset på `main`
 
