@@ -213,7 +213,8 @@ jobs:
           echo "✅ /graphql svarar via nginx, med data ur en seedad databas"
 
   # M7: bildfunktionen. Appen skapades en gång med infra/azure/skapa-funktion.sh – jobbet lägger bara
-  # upp ny kod i den. Oberoende av deploy: functions/ är ett eget paket utan image.
+  # upp ny kod i den. Oberoende av Deploy → Azure staging: API:et läser funktionens adress ur miljön
+  # (IMAGE_FUNCTION_URL), inte ur koden, så de två jobben kan deploya i vilken ordning som helst.
   deploy-function:
     name: Deploy → Azure Functions
     runs-on: ubuntu-latest

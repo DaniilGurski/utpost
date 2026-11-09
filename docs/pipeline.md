@@ -80,19 +80,19 @@ Jobbet kör integrationstesterna i `api/` (`npm run test:api`) mot riktiga datab
 
 ## Vad varje steg fångar
 
-| Steg         | Fångar                                                                         |
-| ------------ | ------------------------------------------------------------------------------ |
-| npm ci       | Lockfil och package.json som inte stämmer överens; garanterar exakta versioner |
-| lint         | Kodproblem och misstänkta mönster (ESLint)                                     |
-| format:check | Filer som inte följer Prettier. Kontrollerar bara, ändrar aldrig               |
-| test         | Regressioner i beteende (Vitest)                                               |
-| typecheck    | Typfel i klient och API (`tsc`)                                                |
-| Integration  | API:et mot riktiga databaser: N+1, inloggningskrav, migrerade loggar           |
-| build        | Trasiga importer och byggfel som lint och test kan missa                       |
-| Image        | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                |
-| Deploy       | Att en merge inte når staging, fel sha i molnet, trasig proxy eller databas    |
-| Deploy-fn    | Att bildfunktionen i Azure kör något annat än `main` eller inte svarar         |
-| Ruleset      | Att inget mergas utan PR, review och gröna checks                              |
+| Steg                     | Fångar                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| npm ci                   | Lockfil och package.json som inte stämmer överens; garanterar exakta versioner    |
+| lint                     | Kodproblem och misstänkta mönster (ESLint)                                        |
+| format:check             | Filer som inte följer Prettier. Kontrollerar bara, ändrar aldrig                  |
+| test                     | Regressioner i beteende (Vitest)                                                  |
+| typecheck                | Typfel i klient och API (`tsc`)                                                   |
+| Integration              | API:et mot riktiga databaser: N+1, inloggningskrav, migrerade loggar              |
+| build                    | Trasiga importer och byggfel som lint och test kan missa                          |
+| Image                    | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                   |
+| Deploy                   | Att en merge inte når staging, fel sha i molnet, trasig proxy eller databas       |
+| Deploy → Azure Functions | En funktion som inte startar i Azure, ett paket utan `node_modules`, fel app-namn |
+| Ruleset                  | Att inget mergas utan PR, review och gröna checks                                 |
 
 ## Uppmätta tider (en körning)
 
