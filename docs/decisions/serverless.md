@@ -88,6 +88,8 @@ Mätt 2026-11-10 med `curl` direkt mot funktionen (4000x3000), ca 80 min efter s
 
 Fyra anrop i följd hamnade på fyra nya instanser, alla kalla och runt 1 s. Bildarbetet tar ca 80 ms av det. Det duger för en uppladdning, och health påverkas inte.
 
+Varma instanser återanvänds: direkt efter en deploy gav 3 av 10 anrop `coldStart:false` på ca 0,2 s. Men Flex skickar ofta nästa anrop till en ny instans även när en varm står ledig, så ett andra anrop är inte garanterat varmt.
+
 Containerappen skalar också till noll och gav 502 i ca 20 s vid väckning. Det hör till hosting-beslutet (se `hosting.md`).
 
 Om kallstarten inte hade dugt:
