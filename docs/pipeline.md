@@ -122,7 +122,7 @@ uppstart av runners och väntan mellan jobben)
 | PR      | 50s     |
 | `main`  | 44s     |
 
-Jobbet kör parallellt med `Kvalitet`, så det förlänger pipelinen bara om det är det långsammaste spåret.
+Jobbet kör efter med `Kvalitet`, så det förlänger pipelinen bara om det är det långsammaste spåret.
 
 ### Jobbet `Deploy → Azure Functions` (M7)
 
