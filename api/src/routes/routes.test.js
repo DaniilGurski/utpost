@@ -58,6 +58,15 @@ describe('A07 Authentication Failures – inloggningen', () => {
     expect(await felLosen.json()).toEqual(await okand.json());
   });
 
+  // Eget fynd (#173): turlistan bäddar in ägarens rad – med select * följde password_hash med.
+  it('turlistan innehåller aldrig password_hash för turernas ägare', async () => {
+    const res = await api('/api/tours');
+    expect(res.status).toBe(200);
+    const tours = await res.json();
+    expect(tours.length).toBeGreaterThan(0);
+    expect(JSON.stringify(tours)).not.toContain('password_hash');
+  });
+
   it('lösenordet i databasen är hashat, inte klartext', async () => {
     const { rows } = await pool.query("select count(*)::int as n from users where password_hash like 'plaintext:%'");
     expect(rows[0].n).toBe(0);

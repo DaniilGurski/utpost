@@ -18,7 +18,6 @@ const mockedUseQuery = vi.mocked(useQuery);
 const user: User = {
   id: 7,
   email: "anna@example.com",
-  password_hash: "",
   display_name: "Anna Berg",
   role: "user",
   created_at: "",

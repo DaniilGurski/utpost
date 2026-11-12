@@ -1,6 +1,7 @@
 import { pool } from "./client.js";
 import { createTables } from "./migrate.js";
 import { pathToFileURL } from "node:url";
+import { hashPassword } from "../lib/password.js";
 
 const REGIONS = [
   "Jämtland",
@@ -61,13 +62,18 @@ export const run = async () => {
     "truncate photos, tour_logs, tours, guides, users restart identity",
   );
 
+  // M8: scrypt är långsam med flit – hasha en gång, före loopen. Alla seedade konton har hemligt123.
+  // De två första är fasta: id 1 redaktor@utpost.se (editor), id 2 medlem@utpost.se (member).
+  const passwordHash = await hashPassword("hemligt123");
+  const FIXED = ["redaktor@utpost.se", "medlem@utpost.se"];
+
   const userIds = [];
   for (let i = 0; i < 12; i++) {
     const name = `${pick(FIRST)} ${pick(LAST)}`;
-    const email = `${name.toLowerCase().replace(" ", ".")}${i}@example.com`;
+    const email = FIXED[i] ?? `${name.toLowerCase().replace(" ", ".")}${i}@example.com`;
     const res = await pool.query(
       `insert into users (email, password_hash, display_name, role) values ($1,$2,$3,$4) returning id`,
-      [email, "plaintext:hemligt123", name, i === 0 ? "editor" : "member"],
+      [email, passwordHash, name, i === 0 ? "editor" : "member"],
     );
     userIds.push(res.rows[0].id);
   }

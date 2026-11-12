@@ -34,5 +34,6 @@ export const createTour = async ({ userId, guideId, title, startedAt, distanceM,
 
 export const deleteTour = async (id) => {
   await query('delete from tour_logs where tour_id = $1', [id]);
+  await query('delete from photos where tour_id = $1', [id]);
   await query('delete from tours where id = $1', [id]);
 };

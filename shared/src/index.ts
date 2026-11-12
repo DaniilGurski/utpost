@@ -12,10 +12,10 @@ type Guide = {
   updated_at: string;
 };
 
+// M8: bara de publika fälten (publicUser i api/src/lib/auth.js). password_hash lämnar aldrig API:et.
 type User = {
   id: number;
   email: string;
-  password_hash: string;
   display_name: string;
   role: string;
   created_at: string;
