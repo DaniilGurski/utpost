@@ -98,6 +98,10 @@ och rättade sedan sökordet till 'fjfjg'.
 
 Cloud 6:
 
+Olika kontroller fångar olika fel, så de behövs tillsammans. Typecheck fångar fel i koden innan den körs. Enhetstestet fångar fel i särskilda funktioner, och komponenttestet fångar fel i komponentfiler. Typer kontrolleras bara vid kompilering, så de säger inget om vad API:et faktiskt skickar vid körning. Det är en brist som tester vid körning måste täcka.
+
+Pipelinen (jobbet Kvalitet) kör lint, tester och typecheck på varje PR, så ett fel stoppar mergen. Mitt medvetet röda test visade att testet faktiskt kan upptäcka fel. Pipelinen vet dock inte vilka tester som körs.
+
 ### Var det syns i mitt arbete
 
 Fullstack 3: `client/src/views/GuidesView.vue` (`ref<Guide[]>`). `elevationGain` finns i
@@ -121,7 +125,9 @@ export const elevationGain = (logs: TourLog[]): number => {
 };
 ```
 
-Cloud 5: utpost-ts-douglas-daniil-garen/client/src/lib/tour.tests.ts
+Cloud 5:
+
+utpost-ts-douglas-daniil-garen/client/src/lib/tour.test.ts
 utpost-ts-douglas-daniil-garen/client/src/views/GuidesView.test.ts
 
 ```ts
@@ -147,6 +153,8 @@ it("visar om sökningen inte matchar någon guide", async () => {
 ```
 
 Cloud 6:
+
+.github/workflows/ci.yml
 
 ### Kvar att förstå
 
@@ -271,11 +279,25 @@ Nej.
 
 Cloud 2:
 
+Serverless Framework är ett verktyg som används för att beskriva, organisera och deploya molntjänster och det skapades för AWS. Serverless deploy är att skapa resurserna för appen i molnet så att den kan användas där. Man kan organisera koden för verktyget i ett enda yml-dokument där man anger plattformen och vilka funktioner som körs och triggers som utlöser funktionerna.
+
+Vi valde bort detta då vi har förstått att det numera helt saknar stöd för azure functions och att det skulle innebära ett nytt verktyg att lära sig.
+
+Verktyget blev stort för själva deploydelen där funktion, adress och rättigheter skapas tillsammans och att allt beskrivs i en enda yaml-fil. Idag kräver Serverless Frameworks senaste version att alla användare måste logga in. Stöd för azure finns inte heller kvar.
+
+Alternativen idag är att använda sin plattforms egna verktyg, ett generellt verktyg för "infrastructure as code" som Terraform, eller att inte köra serverless alls (en kö och en API-container).
+
 ### Var det syns i mitt arbete
 
 Cloud 2:
 
+docs/decisions/serverless.md
+
+https://github.com/DaniilGurski/utpost/actions/runs/42659715323
+
 ### Kvar att förstå
+
+Vad det innebär för deploy att lägga till flera funktioner i serverless, ligger dessa på samma ställe och hur får varje funktion sin trigger. Hur skulle arbetet se annorlunda ut med AWS Lambda eller Google Cloud.
 
 ### Siktar på VG
 
