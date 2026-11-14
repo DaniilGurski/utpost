@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { cleanup, render, screen } from "@testing-library/vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useQuery } from "@urql/vue";
-import { useSessionStore } from "../stores/session";
+import { useAuthStore } from "../stores/auth";
 import ProfileView from "./ProfileView.vue";
 
 // Bara useQuery byts ut, resten av @urql/vue fungerar som vanligt
@@ -51,7 +51,7 @@ const renderView = () =>
 beforeEach(() => {
   pinia = createPinia();
   setActivePinia(pinia);
-  useSessionStore().user = user;
+  useAuthStore().user = user;
 });
 
 afterEach(() => {
