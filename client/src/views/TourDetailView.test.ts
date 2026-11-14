@@ -36,7 +36,11 @@ const respondWith = (result: {
     error: ref(result.error),
   } as unknown as ReturnType<typeof useQuery>);
 
-const renderView = () => render(TourDetailView, { props: { id: "1" } });
+const renderView = () =>
+  render(TourDetailView, {
+    props: { id: "1" },
+    global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+  });
 
 afterEach(() => {
   cleanup();

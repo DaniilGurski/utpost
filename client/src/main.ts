@@ -5,10 +5,10 @@ import { createPinia } from "pinia";
 import urql from "@urql/vue";
 import { client } from "./urql";
 
-const pinia = createPinia();
 const app = createApp(App);
 
-app.use(pinia);
+// M8: Pinia before the router, the guard reads the auth store
+app.use(createPinia());
 app.use(router);
 app.use(urql, client);
 
