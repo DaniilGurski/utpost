@@ -3,12 +3,14 @@ import express from "express";
 import { photosRouter } from "./photos.js";
 import { pool } from "../db/client.js";
 import { config } from "../config.js";
+import { sign } from "../lib/auth.js";
 
 vi.mock("../db/client.js", () => ({ pool: { query: vi.fn() } }));
 vi.mock("../config.js", () => ({
   config: {
     imageFunctionUrl: "http://function.test/api/process-image",
     imageFunctionKey: "",
+    jwtSecret: "test-secret",
   },
 }));
 
@@ -16,7 +18,8 @@ vi.mock("../config.js", () => ({
 const realFetch = globalThis.fetch;
 const functionFetch = vi.fn();
 
-const row = { id: 7, tour_id: 1, filename: "fjall.jpg", width: 4000, height: 3000 };
+// pool.query svarar med samma rad på alla frågor: turkontrollen (M8) ser user_id 1, insert ser fotot.
+const row = { id: 7, tour_id: 1, user_id: 1, filename: "fjall.jpg", width: 4000, height: 3000 };
 const functionResponse = {
   variants: [{ size: 1600, signature: "abc" }],
   processingMs: 12,
@@ -31,7 +34,11 @@ let baseUrl;
 const upload = async () => {
   const res = await realFetch(`${baseUrl}/api/photos`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      // M8: uppladdning kräver inloggning – som turens ägare (user_id 1 i raden ovan).
+      authorization: `Bearer ${sign({ id: 1, email: "agare@example.com", role: "member" })}`,
+    },
     body: JSON.stringify({ tourId: 1, filename: "fjall.jpg", width: 4000, height: 3000 }),
   });
   return { status: res.status, body: await res.json() };
