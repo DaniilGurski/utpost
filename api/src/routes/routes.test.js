@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { app } from '../app.js';
 import { pool } from '../db/client.js';
@@ -12,6 +13,7 @@ import { sign } from '../lib/auth.js';
 // testet som bevisar hålet – inte en skärmdump – och det som hindrar hålet från att komma tillbaka.
 let server;
 let base;
+
 const api = (path, { method = 'GET', body, token } = {}) =>
   fetch(`${base}${path}`, {
     method,
@@ -120,6 +122,86 @@ describe('A01 Broken Access Control – vems tur är det?', () => {
       body: { tourId: 1, filename: 'fjall.jpg', width: 4000, height: 3000 },
     });
     expect(res.status).toBe(401);
+  });
+});
+
+// M8 – nya säkerhetstester för issue #178
+describe('A01 – redaktionens routes (M8)', () => {
+  const body = {
+    title: 'Ny titel',
+    region: 'Dalarna',
+    difficulty: 'medel',
+    lengthKm: 12,
+    bodyHtml: '<p>x</p>',
+    published: true,
+  };
+
+  it('PUT /api/guides/:id utan token ger 401', async () => {
+    const res = await api('/api/guides/1', {
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('en medlem får inte ändra guider (403) – bara rollen editor', async () => {
+    const member = (
+      await pool.query("select id, email, role from users where role = 'member' limit 1")
+    ).rows[0];
+
+    const res = await api('/api/guides/1', {
+      method: 'PUT',
+      body,
+      token: sign(member),
+    });
+
+    expect(res.status).toBe(403);
+  });
+
+  it('en redaktör kan ändra – och får en validerad guide tillbaka', async () => {
+    const editor = (
+      await pool.query("select id, email, role from users where role = 'editor' limit 1")
+    ).rows[0];
+
+    const before = (
+      await pool.query('select * from guides where id = 1')
+    ).rows[0];
+
+    const res = await api('/api/guides/1', {
+      method: 'PUT',
+      token: sign(editor),
+      body: {
+        ...body,
+        title: before.title,
+        region: before.region,
+        difficulty: before.difficulty,
+        lengthKm: before.length_km,
+        bodyHtml: before.body_html,
+        published: before.published,
+      },
+    });
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).title).toBe(before.title);
+
+    const fel = await api('/api/guides/1', {
+      method: 'PUT',
+      token: sign(editor),
+      body: { ...body, difficulty: 'omöjlig' },
+    });
+
+    expect(fel.status).toBe(400);
+  });
+});
+
+describe('A02 Security Misconfiguration – CORS', () => {
+  it('API:et skickar ingen Access-Control-Allow-Origin', async () => {
+    const res = await fetch(`${base}/api/health`, {
+      headers: { origin: 'https://annan-sajt.example' },
+    });
+
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
   });
 });
 

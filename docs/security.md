@@ -15,8 +15,8 @@
 
 | # | Risk | Gäller oss? | Vad vi hittade (fil, endpoint) | Vad vi gjorde (PR) | Kontroll (testet som var rött före fixen, eller curl) |
 |---|---|---|---|---|---|
-| A01 | Broken Access Control | | | | |
-| A02 | Security Misconfiguration | | | | |
+| A01 | Broken Access Control | Ja | `PUT /api/guides/:id` saknade autentisering, rollkontroll och validering. Anrop utan token och från vanliga medlemmar kunde ändra guider. | `requireUser`, `requireRole('editor')`, `validate(guideUpdateSchema)`, kontroll av `idParam` samt 404-hantering. Fix: `fcb715e`, issue #178. | `api/src/routes/routes.test.js`: utan token → 401, member → 403, editor → 200 och ogiltig difficulty → 400. Testerna var röda före fixen och är nu gröna. |
+| A02 | Security Misconfiguration | Ja | `app.use(cors())` i `api/src/app.js` skickade `Access-Control-Allow-Origin: *`. | Tog bort generell CORS-konfiguration och oanvända CORS-beroenden. API:et används via samma origin med nginx/Vite. Fix: `fcb715e`, issue #178. | `api/src/routes/routes.test.js`: test med främmande Origin verifierar att `Access-Control-Allow-Origin` saknas. Rött före fixen, grönt efteråt. |
 | A03 | Software Supply Chain Failures | | | | |
 | A04 | Cryptographic Failures | | | | |
 | A05 | Injection | | | | |
