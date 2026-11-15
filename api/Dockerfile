@@ -10,6 +10,11 @@ COPY shared/package.json shared/
 
 RUN npm ci --workspace=api --omit=dev
 
+# M8 (Trivy image): npm behövs för att installera, inte för att köra. Basimagen node:22-alpine skickar med
+# npm och dess egna beroenden – sårbarheter i dem är fynd i VÅR image fast de aldrig står i vår lockfil.
+# API:et startas med `node`, så npm tas bort ur den färdiga imagen.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # Source code
 COPY shared/ shared/
 COPY api/ api/
