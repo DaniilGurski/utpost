@@ -31,6 +31,7 @@ services:
       retries: 5
 
   api:
+    image: utpost-api # M8: fast namn, så att jobbet Säkerhet kan skanna imagen
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -46,6 +47,7 @@ services:
         condition: service_healthy
 
   client:
+    image: utpost-client
     environment:
       API_UPSTREAM: api:4000
     build:
