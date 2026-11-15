@@ -1,9 +1,11 @@
+
 import { Router, type Request, type Response } from 'express';
 import { pool } from '../db/client.js';
 import type { Guide } from '@utpost/shared';
 import { validate } from '../lib/validate.js';
 import { wrap } from '../lib/wrap.js';
-import { searchSchema } from '../lib/schemas.js';
+import { searchSchema, guideUpdateSchema, idParam } from '../lib/schemas.js';
+import { requireUser, requireRole } from '../lib/auth.js';
 
 export const guidesRouter = Router();
 
@@ -22,33 +24,67 @@ guidesRouter.get('/popular', wrap(async (req: Request, res: Response<Guide[]>) =
   res.json(result.rows);
 }));
 
-// M8 (A05): sökordet skickas som ett värde ($1), aldrig som en del av SQL-frågan. validate lägger
-// det validerade värdet i req.validQuery (req.query går inte att skriva över i Express 4).
+// M8 (A05): sökordet skickas som ett värde ($1), aldrig som en del av SQL-frågan.
+// validate lägger det validerade värdet i req.validQuery.
 guidesRouter.get(
   '/search',
   validate(searchSchema, 'query'),
   wrap(async (req: Request, res: Response<Guide[]>) => {
     const { q } = (req as Request & { validQuery: { q: string } }).validQuery;
+
     const result = await pool.query<Guide>(
       'select * from guides where title ilike $1 or region ilike $1 order by updated_at desc',
       [`%${q}%`],
     );
+
     res.json(result.rows);
   }),
 );
 
 guidesRouter.get('/:slug', wrap(async (req: Request, res: Response<Guide | { error: string }>) => {
   const result = await pool.query('select * from guides where slug = $1', [req.params.slug]);
-  if (!result.rows[0]) return res.status(404).json({ error: 'hittades inte' });
+
+  if (!result.rows[0]) {
+    return res.status(404).json({ error: 'hittades inte' });
+  }
+
   res.json(result.rows[0]);
 }));
 
-guidesRouter.put('/:id', async (req, res: Response<Guide>) => {
-  const { title, region, difficulty, lengthKm, bodyHtml, published } = req.body;
-  const result = await pool.query(
-    `update guides set title=$1, region=$2, difficulty=$3, length_km=$4, body_html=$5,
-     published=$6, updated_at=now() where id=$7 returning *`,
-    [title, region, difficulty, lengthKm, bodyHtml, published, req.params.id],
-  );
-  res.json(result.rows[0]);
-});
+// M8 (#178): Endast inloggade redaktörer får uppdatera guider.
+// Validerar request-body och guide-id innan databasen uppdateras.
+guidesRouter.put(
+  '/:id',
+  requireUser,
+  requireRole('editor'),
+  validate(guideUpdateSchema),
+  wrap(async (req: Request, res: Response<Guide | { error: string }>) => {
+    const id = idParam.safeParse(req.params.id);
+
+    if (!id.success) {
+      return res.status(400).json({ error: 'ogiltigt id' });
+    }
+
+    const { title, region, difficulty, lengthKm, bodyHtml, published } = req.body;
+
+    const result = await pool.query<Guide>(
+      `update guides
+       set title=$1,
+           region=$2,
+           difficulty=$3,
+           length_km=$4,
+           body_html=$5,
+           published=$6,
+           updated_at=now()
+       where id=$7
+       returning *`,
+      [title, region, difficulty, lengthKm, bodyHtml, published, id.data],
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'hittades inte' });
+    }
+
+    res.json(result.rows[0]);
+  }),
+);

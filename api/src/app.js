@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import { config } from "./config.js";
 import { pool } from "./db/client.js";
 import { getMongo } from "./db/mongo.js";
@@ -15,8 +14,8 @@ export const app = express();
 
 app.use(yoga.graphqlEndpoint, trackQueries, yoga);
 
-// M8: 1 MB räcker – bilderna skickas inte hit, bara måtten. (cors() tas bort i steg 4, fredagens hål.)
-app.use(cors());
+// M8 (#178): API:et använder samma origin via nginx eller Vites proxy.
+// Ingen generell CORS-policy som tillåter andra webbplatser.
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", wrap(async (req, res) => {
