@@ -4,24 +4,24 @@ Cloud, CI/CD och arbetsmetodik + Avancerad fullstackutveckling, v. 38–51 2026
 
 ## Sammanfattningstabell
 
-| Kursmål      | Post i vecka | Var det syns i mitt arbete | Siktar på VG |
-| ------------ | ------------ | -------------------------- | ------------ |
-| Fullstack 4  | 38           |                            | –            |
-| Fullstack 5  | 39           |                            | –            |
-| Cloud 3      | 39           |                            | –            |
-| Fullstack 3  | 40           |                            | –            |
-| Cloud 5      | 40           |                            | –            |
-| Cloud 6      | 40           |                            | –            |
-| Fullstack 1  | 41           |                            | –            |
-| Cloud 4      | 41           |                            | –            |
-| Fullstack 2  | 42           |                            | –            |
-| Cloud 1      | 44           |                            | –            |
-| Cloud 2      | 45           |                            | –            |
-| Fullstack 8  | 46           |                            | –            |
-| Fullstack 9  | 47           |                            | –            |
-| Fullstack 6  | 48           |                            | –            |
-| Fullstack 7  | 48           |                            | –            |
-| Fullstack 19 | 49           |                            | –            |
+| Kursmål      | Post i vecka | Var det syns i mitt arbete                                  | Siktar på VG |
+| ------------ | ------------ | ----------------------------------------------------------- | ------------ |
+| Fullstack 4  | 38           | GuideCard.vue GuidesView.vue                                | –            |
+| Fullstack 5  | 39           |                                                             | –            |
+| Cloud 3      | 39           | PR#34:.github/workflows/ci.yml client/src/sanity.test.js    |
+| Fullstack 3  | 40           | labb 2/10 se nedan                                          | –            |
+| Cloud 5      | 40           | labb 2/10 se nedan                                          |
+| Cloud 6      | 40           | .github/workflows/ci.yml + PR #69                           | –            |
+| Fullstack 1  | 41           | skrevs gemensamt docs/decisions/databas.md                  | –            |
+| Cloud 4      | 41           | PR #86 client/Dockerfile                                    | –            |
+| Fullstack 2  | 42           | PR #98 schema.js och PR#112 ToursView.vue ToursView.test.ts |
+| Cloud 1      | 44           | PR#150 .github/workflows/ci.yml                             | –            |
+| Cloud 2      | 45           | PR#184 docs/decisions/serverless.md                         | –            |
+| Fullstack 8  | 46           |                                                             | –            |
+| Fullstack 9  | 47           |                                                             | –            |
+| Fullstack 6  | 48           |                                                             | –            |
+| Fullstack 7  | 48           |                                                             | –            |
+| Fullstack 19 | 49           |                                                             | –            |
 
 ---
 
@@ -98,7 +98,7 @@ och rättade sedan sökordet till 'fjfjg'.
 
 Cloud 6:
 
-Olika kontroller fångar olika fel, så de behövs tillsammans. Typecheck fångar fel i koden innan den körs. Enhetstestet fångar fel i särskilda funktioner, och komponenttestet fångar fel i komponentfiler. Typer kontrolleras bara vid kompilering, så de säger inget om vad API:et faktiskt skickar vid körning. Det är en brist som tester vid körning måste täcka.
+Olika kontroller fångar olika fel, så de behövs tillsammans. Typecheck fångar fel i koden innan den körs. Enhetstestet fångar fel i särskilda funktioner, och komponenttestet fångar fel i komponent eller modul. Typer kontrolleras bara vid kompilering, så de säger inget om vad API:et faktiskt skickar vid körning. Det är en brist som tester vid körning måste täcka.
 
 Pipelinen (jobbet Kvalitet) kör lint, tester och typecheck på varje PR, så ett fel stoppar mergen. Mitt medvetet röda test visade att testet faktiskt kan upptäcka fel. Pipelinen vet dock inte vilka tester som körs.
 
