@@ -28,6 +28,7 @@
     "@graphql-codegen/cli": "^7.4.6",
     "@graphql-codegen/client-preset": "^6.2.3",
     "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/user-event": "^14.6.10",
     "@testing-library/vue": "^8.1.0",
     "@typescript-eslint/parser": "^8.71.0",
     "@vitejs/plugin-vue": "^6.0.8",

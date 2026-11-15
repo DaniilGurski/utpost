@@ -5,7 +5,8 @@ import ToursView from "../views/ToursView.vue";
 import TourDetailView from "../views/TourDetailView.vue";
 import LoginView from "../views/LoginView.vue";
 import ProfileView from "../views/ProfileView.vue";
-import { useSessionStore } from "../stores/session.js";
+import PhotoUploadView from "../views/PhotoUploadView.vue";
+import { useAuthStore } from "../stores/auth";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,21 +43,32 @@ const router = createRouter({
       component: TourDetailView,
     },
     {
+      path: "/tour/:id/upload",
+      name: "upload",
+      props: true,
+      component: PhotoUploadView,
+      meta: { requiresAuth: true },
+    },
+    {
       path: "/profile",
       name: "profile",
       component: ProfileView,
+      meta: { requiresAuth: true },
     },
   ],
 });
 
-router.beforeEach((to, _) => {
-  const store = useSessionStore();
+// M8: the guard is UX, not security. Logged-out users don't get a view that
+// would fail anyway. The protection is the API's 401: bypassing the guard
+// still gets no data.
+router.beforeEach((to) => {
+  const auth = useAuthStore();
 
-  if (!store.loggedIn && to.name !== "login") {
-    return { name: "login" };
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+    return { name: "login", query: { redirect: to.fullPath } };
   }
 
-  if (store.loggedIn && to.name === "login") {
+  if (auth.isLoggedIn && to.name === "login") {
     return { name: "guides" };
   }
 });

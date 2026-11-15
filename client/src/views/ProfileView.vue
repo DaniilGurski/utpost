@@ -4,9 +4,9 @@ import { RouterLink } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useQuery } from "@urql/vue";
 import { graphql } from "../gql";
-import { useSessionStore } from "../stores/session";
+import { useAuthStore } from "../stores/auth";
 
-const { user } = storeToRefs(useSessionStore());
+const { user } = storeToRefs(useAuthStore());
 
 // Schemat kan inte filtrera på användare, så vi hämtar max antal och filtrerar här
 const { data, fetching, error } = useQuery({

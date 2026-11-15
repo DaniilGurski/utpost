@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from "vue-router";
-import { useSessionStore } from "../stores/session";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { RouterLink, useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
 
+const auth = useAuthStore();
+const route = useRoute();
 const router = useRouter();
-const session = useSessionStore();
-const { user, loggedIn } = storeToRefs(session);
-const { logout } = session;
-
-const displayName = computed(() => {
-  return user.value?.display_name;
-});
 
 const handleLogout = () => {
-  logout();
-  router.push("/login");
+  auth.logout();
+
+  // Leave a protected view, the data on it is no longer ours to show
+  if (route.meta.requiresAuth) {
+    router.push({ name: "guides" });
+  }
 };
 </script>
 
@@ -25,10 +22,16 @@ const handleLogout = () => {
       <RouterLink to="/guides"> Guides </RouterLink>
       <RouterLink to="/tours"> Tours </RouterLink>
     </nav>
-    <div v-if="loggedIn">
-      <RouterLink to="/profile"> {{ displayName }}</RouterLink>
-      <button @click="handleLogout">Logout</button>
+    <div v-if="auth.user">
+      <RouterLink to="/profile"> {{ auth.user.display_name }}</RouterLink>
+      <button type="button" @click="handleLogout">Logga ut</button>
     </div>
+    <RouterLink
+      v-else
+      :to="{ name: 'login', query: { redirect: route.fullPath } }"
+    >
+      Logga in
+    </RouterLink>
   </header>
 </template>
 

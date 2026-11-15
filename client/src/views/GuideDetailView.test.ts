@@ -41,7 +41,9 @@ describe("GuideDetailView", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Lappland · medel · 12 km")).toBeInTheDocument();
     expect(screen.getByText("Gå norrut.")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith("/api/guides/kungsleden", undefined);
+    expect(fetchMock).toHaveBeenCalledWith("/api/guides/kungsleden", {
+      headers: {},
+    });
   });
 
   it("shows 'Guiden finns inte.' when the API returns 404", async () => {
@@ -53,7 +55,7 @@ describe("GuideDetailView", () => {
   });
 
   it("shows the error message for other errors", async () => {
-    respondWith({ message: "Databasen är nere" }, 500);
+    respondWith({ error: "Databasen är nere" }, 500);
     renderView();
 
     expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
