@@ -9,6 +9,7 @@
 | Fullstack 2              | V42          | PR #97, PR #99, PR #111, PR #114 `docs/decisions/api-style.md`                    | -            |
 | Fullstack 2 · Cloud 6    | V43          | PR #118, PR #119, PR #120, PR #122/#125, PR #124, PR #133, `README.md`            | -            |
 | Cloud 1                  | V44          | PR #141, PR #142, PR #144, PR #145, PR #152, PR #153, `docs/decisions/hosting.md` | -            |
+| Cloud 2                  | V45          | PR #165, PR #166/#167, PR #168, PR #169/#171, `docs/decisions/serverless.md`      | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -197,6 +198,30 @@ Cloud 1: PR #141 (konfiguration från miljön), PR #142 (`boot.js`, sha i `/api/
 ### Kvar att förstå
 
 Hur produktionsdatabaserna (Neon och MongoDB Atlas) kopplas in när sidecars försvinner.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 45 – Serverless
+
+**Kursmål:** Cloud 2
+
+### Vad jag förstått
+
+Cloud 2:
+
+- Bildomskalningen är synkron och CPU-tung och blockerade event loopen i API:et. När den flyttades till funktionen `process-image` gick health max från 1447 ms till 30 ms i staging
+- Flex Consumption skalar till noll och skalar ut per anrop. En kallstart tar ca 1 s, och en varm instans återanvänds men det är inte garanterat
+- Inlåsning: logiken i `image.js` är portabel, men handlern, konfigurationen och deployen är Azure-specifika. Serverless Framework valdes bort eftersom v4 bara stöder AWS
+
+### Var det syns i mitt arbete
+
+Cloud 2: PR #165 (funktionen i Azure, nyckel till staging), PR #166/#167 (jobbet `deploy-function`), PR #168 (loggrad från pipelinen), PR #169/#171 (kallstart, `docs/decisions/serverless.md`)
+
+### Kvar att förstå
+
+Hur API:et kan slippa vänta på funktionen (kö i stället för synkront HTTP-anrop). Lokalt blev uppladdningen knappt snabbare.
 
 ### Siktar på VG
 
