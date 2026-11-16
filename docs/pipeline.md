@@ -8,6 +8,7 @@ flowchart TD
     B --> C{Workflow triggas: on pull_request}
     C --> Q
     C --> INT
+    C --> SEC
 
     subgraph Q [Jobb: quality / Kvalitet]
         Q1[checkout] --> Q2[setup-node 22 + npm-cache]
@@ -27,7 +28,16 @@ flowchart TD
         N5 --> N6[npm run test:api]
     end
 
+    subgraph SEC [Jobb: security / Säkerhet, parallellt, inga needs]
+        SC1[checkout + setup-node + npm ci] --> SC2[npm audit --omit=dev --audit-level=high]
+        SC2 --> SC3[Trivy på repot]
+        SC3 --> SC4[skapa .env + docker compose up --wait]
+        SC4 --> SC5[Trivy på api-imagen]
+        SC5 --> SC6[ZAP baseline mot localhost:3001]
+    end
+
     INT -->|röd| X
+    SEC -->|röd| X
 
     Q -->|grön| BLD
     Q -->|röd| X[PR blockeras]
@@ -50,6 +60,7 @@ flowchart TD
 
     IMG -->|grön| R{Ruleset uppfyllt?}
     INT -->|grön| R
+    SEC -->|grön| R
     IMG -->|röd| X
     R -->|ja| M[Merge till main]
     R -->|nej| X
@@ -90,6 +101,7 @@ Jobbet kör integrationstesterna i `api/` (`npm run test:api`) mot riktiga datab
 | Integration              | API:et mot riktiga databaser: N+1, inloggningskrav, migrerade loggar              |
 | build                    | Trasiga importer och byggfel som lint och test kan missa                          |
 | Image                    | Dockerfiler som inte bygger; på main publiceras imagerna i GHCR                   |
+| Säkerhet                 | Sårbara paket, hemligheter, root i Dockerfile och saknade säkerhetsheaders        |
 | Deploy                   | Att en merge inte når staging, fel sha i molnet, trasig proxy eller databas       |
 | Deploy → Azure Functions | En funktion som inte startar i Azure, ett paket utan `node_modules`, fel app-namn |
 | Ruleset                  | Att inget mergas utan PR, review och gröna checks                                 |
@@ -114,6 +126,8 @@ Körning: [2026-09-28] · Sekventiell (needs: quality): ja
 
 **Total pipeline-tid (vägg-tid):** 30s (jobben summerar till 25s, resten är
 uppstart av runners och väntan mellan jobben)
+
+**Säkerhet (M8):** ca 2,5 min (2 min 33 s) på `main`. Jobbet körs på varje PR, parallellt med `Kvalitet`, och har inga `needs`. Det är därför det långsammaste spåret: `npm audit` och Trivy tar sekunder, medan bygget av imagerna och ZAP-skanningen står för det mesta av tiden.
 
 ### Jobbet `Integration` (M5, B7)
 
@@ -144,11 +158,13 @@ Bekräfta uppgifterna med den som ställt in rulesetet:
 
 - Restrict deletions
 - Pull request krävs innan merge, minst en godkännare
-- Required status checks: `Kvalitet`, `Integration`, `Bygg` och `Image`
+- Required status checks: `Kvalitet`, `Integration`, `Bygg`, `Image` och `Säkerhet`
 - Branchen som mergas behöver vara up to date med main
 - Blockera force push
 
 `Deploy → Azure staging` och `Deploy → Azure Functions` är inga required checks: de körs bara på `main`, efter merge, och hoppas över på PR:er. De två deployjobben är oberoende av varandra. Funktionsjobbet väntar bara på `Kvalitet`, eftersom `functions/` är ett eget paket utan image. En röd funktionsdeploy stoppar alltså inte staging, och tvärtom.
+
+`Säkerhet` körs på varje PR, parallellt med `Kvalitet`, och har inga `needs`. En röd skanning (`npm audit`, Trivy eller ZAP) blockerar merge på samma sätt som ett rött test.
 
 ## M6: bevis
 
