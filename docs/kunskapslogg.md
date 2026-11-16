@@ -313,9 +313,19 @@ Nej.
 
 Fullstack 8:
 
+OWASP top 10 är en lista med de 10 mest kritiska säkerhetsriskerna för moderna webbappar. Den tas fram av ett öppet community med samma namn: The Open Worldwide Application Security Project. De arbetar fram punkterna med hjälp av en enkät för säkerhetsexperter och med statistik från verkliga säkerhetstester. Exempel från listan är:
+
+A01 Broken Access Control - Användare eller system kan nå data och funktioner de saknar behörighet till. Utpost: requireUser, requireRole('editor') lades till PUT /api/guides/:id och API kontrollerar ägaren mot databasen på DELETE /api/tours/:id. Routen kräver inloggning och jämför turens ägare i databasen med den inloggade användaren. Det räcker alltså inte med id. 401 betyder att vi inte vet vem du är, 403 att du är inloggad men inte får.
+
+A02 Security Misconfiguration - Svagheter såsom fel rättigheter eller standardinställningar körs i appen, i molnet eller servern. Utpost: USER node lades till i api/Dockerfile så att API:et inte körs som root. Säkerhetsheaders lades till i nginx (CSP, nosniff, X-Frame-Options). Processen körs som användaren `node` med minsta möjliga rättigheter. nginx skickar headers som CSP som stänger dörrar en angripare annars kunde använda.
+
+A03 Software Supply Chain Failures - Brister hos tredjepartsberoenden som påverkar vår egen app. Utpost: npm audit hittade proxy-addr (critical, transitivt via Express), body-parser och drizzle-orm (direkt, breaking change), ordnades med npm audit fix. Drizzle uppgraderades manuellt från 0.36 till 0.45. Jobbet Säkerhet skannar paketen på varje PR och blockerar merge om något allvarligt hittas.
+
 ### Var det syns i mitt arbete
 
 Fullstack 8:
+
+docs/security.md. Rött test före fix: https://github.com/DaniilGurski/utpost/actions/runs/43736742190
 
 ### Kvar att förstå
 
