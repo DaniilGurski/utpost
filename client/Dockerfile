@@ -20,6 +20,8 @@ RUN npm run build --workspace=client
 FROM nginx:1.27-alpine
 ENV API_UPSTREAM=api:4000
 COPY client/nginx.conf.template /etc/nginx/templates/default.conf.template
+# M8: säkerhetsheadrarna, inkluderade av varje location i mallen ovan.
+COPY client/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /app/client/dist /usr/share/nginx/html
 
 EXPOSE 80
