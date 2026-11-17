@@ -23,7 +23,7 @@ Testerna finns i [`api/src/routes/routes.test.js`](../api/src/routes/routes.test
 | A06 | Insecure Design | Delvis | Inloggningen har ingen rate limit. | Inget än, se *Kända brister*. | – |
 | A07 | Authentication Failures | Ja | Token gällde i 30 dagar, och registreringen tog emot vilket lösenord som helst. | Token gäller i 1 timme, och lösenordet måste ha minst 8 tecken. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "registrering med för kort lösenord ger 400 med vad som var fel" |
 | A08 | Software or Data Integrity Failures | Delvis | `jwt.verify` angav ingen algoritm. | Bara HS256 godtas. [#177](https://github.com/DaniilGurski/utpost/pull/177) | – |
-| A09 | Security Logging & Alerting Failures | Nej | Misslyckade inloggningar, 401 och 403 loggas inte. | Inget än, se *Kända brister*. | – |
+| A09 | Security Logging & Alerting Failures | Ja | Misslyckade inloggningar, 401 och 403 loggas inte. | Inget än, se *Kända brister*. | – |
 | A10 | Mishandling of Exceptional Conditions | Ja | Fel i async-routes lämnade anropet hängande. | En felhanterare som alltid svarar. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "trasig JSON ger 400 med ett svar – inte ett anrop som hänger" |
 
 ## Validering av indata
