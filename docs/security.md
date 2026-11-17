@@ -1,43 +1,45 @@
 # Säkerhet – Utpost
 
-*Mall (M8). Byt ut exempelraderna mot era egna fynd. Minst tre rader ska ha ett riktigt fynd, en fix i en PR och ett test som var rött före fixen. "Gäller inte oss, för …" är också ett svar – men bara om det är sant. Listan följer OWASP Top 10 (2025).*
-
-**Datum:** ______
-**Hotbilden i en mening:** ______ (vad är värt att skydda i Utpost, och vem är angriparen? Användarnas turer och bilder, redaktionens guider, och – när vi lanserar – kontona. Angriparen är oftast ett skript, inte en person.)
+**Datum:** 2026-11-16
+**Hotbilden i en mening:** Kontona, användarnas turer och bilder och redaktionens guider är värda att skydda. Angriparen är oftast ett skript, inte en person.
 
 ## Autentiseringen (M8)
 
-- Lösenord: ______ (hur lagras de, med vilket schema? Var i koden?)
-- Token: ______ (vad står i den, hur länge gäller den, var ligger den i klienten, vad händer vid omladdning?)
-- Skyddade routes: ______ (vilka anrop kräver token, vilka kräver rollen editor, och var sitter kontrollen – i klientens router eller i API:et?)
+- **Lösenord:** hashas med scrypt och salt ([`api/src/lib/password.js`](../api/src/lib/password.js)). Före #177 låg de i klartext.
+- **Token:** en JWT (HS256) med id, e-post och roll som gäller i 1 timme. Klienten håller den i minnet, så en omladdning loggar ut.
+- **Skyddade routes:** kontrollen sitter i API:et. Att skapa eller ta bort turer och ladda upp bilder kräver inloggning, och man får bara ändra sina egna. Att ändra guider kräver rollen editor.
 
 ## OWASP Top 10 – genomgång
 
-| # | Risk | Gäller oss? | Vad vi hittade (fil, endpoint) | Vad vi gjorde (PR) | Kontroll (testet som var rött före fixen, eller curl) |
+Testerna finns i [`api/src/routes/routes.test.js`](../api/src/routes/routes.test.js) och var röda före fixen ([#176](https://github.com/DaniilGurski/utpost/pull/176)).
+
+| # | Risk | Gäller oss? | Vad vi hittade | Vad vi gjorde (PR) | Kontroll |
 |---|---|---|---|---|---|
-| A01 | Broken Access Control | Ja | `PUT /api/guides/:id` saknade autentisering, rollkontroll och validering. Anrop utan token och från vanliga medlemmar kunde ändra guider. | `requireUser`, `requireRole('editor')`, `validate(guideUpdateSchema)`, kontroll av `idParam` samt 404-hantering. Fix: `fcb715e`, issue #178. | `api/src/routes/routes.test.js`: utan token → 401, member → 403, editor → 200 och ogiltig difficulty → 400. Testerna var röda före fixen och är nu gröna. |
-| A02 | Security Misconfiguration | Ja | `app.use(cors())` i `api/src/app.js` skickade `Access-Control-Allow-Origin: *`. | Tog bort generell CORS-konfiguration och oanvända CORS-beroenden. API:et används via samma origin med nginx/Vite. Fix: `fcb715e`, issue #178. | `api/src/routes/routes.test.js`: test med främmande Origin verifierar att `Access-Control-Allow-Origin` saknas. Rött före fixen, grönt efteråt. |
-| A03 | Software Supply Chain Failures | | | | |
-| A04 | Cryptographic Failures | | | | |
-| A05 | Injection | | | | |
-| A06 | Insecure Design | | | | |
-| A07 | Authentication Failures | | | | |
-| A08 | Software or Data Integrity Failures | | | | |
-| A09 | Security Logging & Alerting Failures | | | | |
-| A10 | Mishandling of Exceptional Conditions | | | | |
+| A01 | Broken Access Control | Ja | Vem som helst kunde ta bort turer och ändra guider, och `GET /api/tours` skickade med `password_hash`. | Inloggning, ägarkontroll, rollen editor och bara publika fält i svaren. [#177](https://github.com/DaniilGurski/utpost/pull/177), [#183](https://github.com/DaniilGurski/utpost/pull/183) | "en medlem kan inte ta bort någon annans tur (403)", "en medlem får inte ändra guider (403) – bara rollen editor" |
+| A02 | Security Misconfiguration | Ja | CORS tillät alla origins, och nginx saknade säkerhetsheaders. | Tog bort CORS och lade till säkerhetsheaders i nginx. [#183](https://github.com/DaniilGurski/utpost/pull/183), [#184](https://github.com/DaniilGurski/utpost/pull/184) | "API:et skickar ingen Access-Control-Allow-Origin", ZAP i pipelinen |
+| A03 | Software Supply Chain Failures | Ja | Sårbara paket hittades med npm audit och Trivy. | Uppdaterade paketen och lade till skanning i pipelinen. [#184](https://github.com/DaniilGurski/utpost/pull/184) | Jobbet *Säkerhet* blev rött med en gammal express ([#185](https://github.com/DaniilGurski/utpost/pull/185)). |
+| A04 | Cryptographic Failures | Ja | Lösenorden låg i klartext. | scrypt med salt. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "lösenordet i databasen är hashat, inte klartext" |
+| A05 | Injection | Ja | Sökningen byggde SQL med en template string. | Parametriserad fråga. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "ett citattecken i sökordet ger 200 och en tom lista, inte 500" |
+| A06 | Insecure Design | Delvis | Inloggningen har ingen rate limit. | Inget än, se *Kända brister*. | – |
+| A07 | Authentication Failures | Ja | Token gällde i 30 dagar, och registreringen tog emot vilket lösenord som helst. | Token gäller i 1 timme, och lösenordet måste ha minst 8 tecken. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "registrering med för kort lösenord ger 400 med vad som var fel" |
+| A08 | Software or Data Integrity Failures | Delvis | `jwt.verify` angav ingen algoritm. | Bara HS256 godtas. [#177](https://github.com/DaniilGurski/utpost/pull/177) | – |
+| A09 | Security Logging & Alerting Failures | Ja | Misslyckade inloggningar, 401 och 403 loggas inte. | Inget än, se *Kända brister*. | – |
+| A10 | Mishandling of Exceptional Conditions | Ja | Fel i async-routes lämnade anropet hängande. | En felhanterare som alltid svarar. [#177](https://github.com/DaniilGurski/utpost/pull/177) | "trasig JSON ger 400 med ett svar – inte ett anrop som hänger" |
 
 ## Validering av indata
 
-______ (var sitter valideringen, vilka scheman finns, vad händer vid ogiltig indata – svarskoden och formen på svaret?)
+Valideringen sker med Zod-scheman ([`api/src/lib/schemas.js`](../api/src/lib/schemas.js)) i API:et innan routen körs. Ogiltig indata ger 400 med `{ error, issues }`, och oväntade fel ger 500 utan detaljer.
 
 ## Headers vi sätter (nginx)
 
-______ (`curl -I` mot staging – CSP och de andra säkerhetsheadrarna. Kommer i fredagens labb.)
+[`client/security-headers.conf`](../client/security-headers.conf) sätter CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` och `Permissions-Policy`. `server_tokens` är avslaget. Alla syns med `curl -I` mot staging.
 
 ## Skanning i pipelinen
 
-______ (vilka verktyg kör i jobbet *Säkerhet*, vad hittar var och en, och vad gör jobbet rött. Kommer i fredagens labb.)
+Jobbet *Säkerhet* kör npm audit, Trivy (på repot och på api-imagen) och ZAP baseline mot appen. Fynd på nivån high eller critical, eller en saknad säkerhetsheader, gör jobbet rött och blockerar merge.
 
 ## Kända brister (medvetet kvar)
 
-______ (det ni valt att inte laga än, och varför. Ärlighet ger poäng: en omladdning loggar ut – refresh-token är inte byggt; bytes lämnar inte browsern; …)
+- En omladdning loggar ut. En refresh-token i en httpOnly-cookie är nästa steg.
+- Inloggningen har ingen rate limit.
+- Säkerhetshändelser loggas inte.
