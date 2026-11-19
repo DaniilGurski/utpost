@@ -40,6 +40,10 @@ services:
       MONGO_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
       # M7: func start körs på datorn, utanför Docker. På Linux: kör API:et med npm run dev:api i stället.
       IMAGE_FUNCTION_URL: http://host.docker.internal:7071/api/process-image
+      # M9: tomma = CMS:et avstängt, appen kör utan notiser.
+      CONTENTFUL_SPACE_ID: ${CONTENTFUL_SPACE_ID:-}
+      CONTENTFUL_DELIVERY_TOKEN: ${CONTENTFUL_DELIVERY_TOKEN:-}
+      CONTENTFUL_PREVIEW_TOKEN: ${CONTENTFUL_PREVIEW_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy

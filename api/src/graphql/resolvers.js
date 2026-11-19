@@ -29,6 +29,17 @@ export const resolvers = {
     guide: (_, { slug }) => getGuideBySlug(slug),
     tours: (_, { limit }) => listTours(Math.max(0, Math.min(limit, MAX_TOURS))),
     tour: (_, { id }) => getTour(id),
+    // M9: notiserna kommer ur CMS:et (cms/contentful.js), inte ur databasen. Utkast får bara
+    // redaktionen se: rollen kontrolleras HÄR, på servern, som också håller preview-nyckeln.
+    notices: (_, { preview }, { user, cms }) => {
+      if (!preview) return cms.notices();
+      if (user?.role !== "editor") {
+        throw new GraphQLError("Förhandsgranskningen kräver rollen editor", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
+      return cms.previewNotices();
+    },
   },
 
   User: {
@@ -39,6 +50,9 @@ export const resolvers = {
     bodyHtml: (guide) => guide.body_html,
     heroImage: (guide) => guide.hero_image,
     updatedAt: (guide) => iso(guide.updated_at),
+    // M9: guiden bor i Postgres, notisen i CMS:et – sluggen kopplar ihop dem.
+    notices: async (guide, _, { cms }) =>
+      (await cms.notices()).filter((notice) => notice.guideSlug === guide.slug),
   },
 
   LogPoint: {
