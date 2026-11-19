@@ -47,6 +47,7 @@ export const resolvers = {
   },
 
   Guide: {
+    lengthKm: (guide) => guide.length_km,
     bodyHtml: (guide) => guide.body_html,
     heroImage: (guide) => guide.hero_image,
     updatedAt: (guide) => iso(guide.updated_at),

@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import type { Guide } from "@utpost/shared";
 
-const props = defineProps<{ guide: Guide }>();
+export interface GuideCardGuide {
+  slug: string;
+  title: string;
+  region: string;
+  difficulty: string;
+  lengthKm: number;
+  bodyHtml: string;
+}
+
+const props = defineProps<{ guide: GuideCardGuide }>();
 </script>
 
 <template>
@@ -14,8 +22,8 @@ const props = defineProps<{ guide: Guide }>();
     </h3>
     <p>
       {{ props.guide.region }} · {{ props.guide.difficulty }} ·
-      {{ props.guide.length_km }} km
+      {{ props.guide.lengthKm }} km
     </p>
-    <div v-html="props.guide.body_html.slice(0, 180)"></div>
+    <div v-html="props.guide.bodyHtml.slice(0, 180)"></div>
   </div>
 </template>

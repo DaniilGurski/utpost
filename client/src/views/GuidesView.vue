@@ -1,46 +1,79 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
-import type { Guide } from "@utpost/shared";
+import { computed, ref } from "vue";
+import { useQuery } from "@urql/vue";
 import GuideCard from "../components/GuideCard.vue";
-import { get } from "../api";
+import NoticeList from "../components/NoticeList.vue";
+import { graphql } from "../gql";
+import { useAuthStore } from "../stores/auth";
 
-const guides = ref<Guide[]>([]);
+const auth = useAuthStore();
+const isEditor = computed(() => auth.user?.role === "editor");
+
+// M9: bara redaktionen kan be om utkast. Servern kontrollerar rollen ändå –
+// kryssrutan är bekvämlighet, inte skydd.
+const preview = ref(false);
+
+const { data, fetching, error } = useQuery({
+  query: graphql(`
+    query GuidesPage($preview: Boolean!) {
+      guides {
+        id
+        slug
+        title
+        region
+        difficulty
+        lengthKm
+        bodyHtml
+      }
+      notices(preview: $preview) {
+        id
+        title
+        level
+        status
+        guideSlug
+        body {
+          runs {
+            text
+            bold
+            italic
+            href
+          }
+        }
+      }
+    }
+  `),
+  variables: computed(() => ({ preview: preview.value })),
+  // Utkast ska alltid vara färska; det publicerade får komma ur cachen.
+  requestPolicy: computed(() =>
+    preview.value ? "network-only" : "cache-first",
+  ),
+});
+
 const query = ref("");
-const filteredGuides = computed(() => {
-  return guides.value.filter((g) =>
+const filteredGuides = computed(() =>
+  (data.value?.guides ?? []).filter((g) =>
     g.title.toLowerCase().includes(query.value.toLowerCase()),
-  );
-});
-
-const loading = ref(true);
-const error = ref("");
-
-const filteredGuidesCount = computed(() => {
-  return filteredGuides.value.length;
-});
-
-onMounted(async () => {
-  loading.value = true;
-  const result = await get<Guide[]>("/guides");
-  loading.value = false;
-
-  if (!result.ok) {
-    error.value = result.error.message;
-    return;
-  }
-
-  guides.value = result.value;
-});
+  ),
+);
+const filteredGuidesCount = computed(() => filteredGuides.value.length);
 </script>
 
 <template>
   <h1>Guides View</h1>
+
+  <label v-if="isEditor">
+    <input v-model="preview" type="checkbox" />
+    Förhandsgranska: visa utkast
+  </label>
+
+  <NoticeList v-if="data" :notices="data.notices" />
+
   <input v-model="query" type="text" placeholder="sök guider" />
 
   <div>
-    <p v-if="loading">Laddar...</p>
+    <p v-if="fetching">Laddar...</p>
     <p v-if="error">
-      {{ error }}
+      {{ error.message }}
     </p>
   </div>
 

@@ -8,6 +8,66 @@ export type Incremental<T> =
       [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
     };
 import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+export type GuideDetailsQueryVariables = Exact<{
+  slug: string;
+}>;
+
+export type GuideDetailsQuery = {
+  guide: {
+    title: string;
+    region: string;
+    difficulty: string;
+    lengthKm: number;
+    bodyHtml: string;
+    notices: Array<{
+      id: string;
+      title: string;
+      level: string;
+      status: string;
+      guideSlug: string | null;
+      body: Array<{
+        runs: Array<{
+          text: string;
+          bold: boolean;
+          italic: boolean;
+          href: string | null;
+        }>;
+      }>;
+    }>;
+  } | null;
+};
+
+export type GuidesPageQueryVariables = Exact<{
+  preview: boolean;
+}>;
+
+export type GuidesPageQuery = {
+  guides: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    region: string;
+    difficulty: string;
+    lengthKm: number;
+    bodyHtml: string;
+  }>;
+  notices: Array<{
+    id: string;
+    title: string;
+    level: string;
+    status: string;
+    guideSlug: string | null;
+    body: Array<{
+      runs: Array<{
+        text: string;
+        bold: boolean;
+        italic: boolean;
+        href: string | null;
+      }>;
+    }>;
+  }>;
+};
+
 export type MinaTurerQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MinaTurerQuery = {
@@ -44,6 +104,217 @@ export type TurerQuery = {
   }>;
 };
 
+export const GuideDetailsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GuideDetails" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "slug" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "String" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "guide" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "slug" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "slug" },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "region" } },
+                { kind: "Field", name: { kind: "Name", value: "difficulty" } },
+                { kind: "Field", name: { kind: "Name", value: "lengthKm" } },
+                { kind: "Field", name: { kind: "Name", value: "bodyHtml" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "notices" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "title" } },
+                      { kind: "Field", name: { kind: "Name", value: "level" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "status" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "guideSlug" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "body" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "runs" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "text" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "bold" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "italic" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "href" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GuideDetailsQuery, GuideDetailsQueryVariables>;
+export const GuidesPageDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GuidesPage" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: {
+            kind: "Variable",
+            name: { kind: "Name", value: "preview" },
+          },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "Boolean" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "guides" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "slug" } },
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "region" } },
+                { kind: "Field", name: { kind: "Name", value: "difficulty" } },
+                { kind: "Field", name: { kind: "Name", value: "lengthKm" } },
+                { kind: "Field", name: { kind: "Name", value: "bodyHtml" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notices" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "preview" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "preview" },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "level" } },
+                { kind: "Field", name: { kind: "Name", value: "status" } },
+                { kind: "Field", name: { kind: "Name", value: "guideSlug" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "body" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "runs" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "text" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "bold" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "italic" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "href" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GuidesPageQuery, GuidesPageQueryVariables>;
 export const MinaTurerDocument = {
   kind: "Document",
   definitions: [
