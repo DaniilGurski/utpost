@@ -35,7 +35,7 @@ const STATUS: Record<string, string> = {
       <RichText :paragraphs="notice.body" />
       <p v-if="notice.guideSlug" class="muted">
         Gäller
-        <RouterLink :to="`/guider/${notice.guideSlug}`"
+        <RouterLink :to="`/guide/${notice.guideSlug}`"
           >den här guiden</RouterLink
         >
       </p>

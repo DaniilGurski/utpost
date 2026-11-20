@@ -2,6 +2,16 @@ import { existsSync } from "node:fs";
 import { defineConfig } from "vitest/config";
 
 if (existsSync("../.env")) process.loadEnvFile("../.env");
+// Testerna anropar aldrig det riktiga CMS:et: samma läge lokalt som i pipelinen (inga nycklar).
+// Tester som behöver CMS:et sätter config själva och byter ut fetch (se webhooktestet).
+for (const key of [
+  "CONTENTFUL_SPACE_ID",
+  "CONTENTFUL_DELIVERY_TOKEN",
+  "CONTENTFUL_PREVIEW_TOKEN",
+]) {
+  delete process.env[key];
+}
+
 // M5: integrationstester mot GraphQL-servern. Körs i Node (ingen jsdom), mot en RIKTIG databas:
 // lokalt den ni har igång (docker compose up -d postgres mongo + npm run seed + npm run migrate:logs),
 // i pipelinen två services som startas för jobbet (ci.yml, jobbet Integration).

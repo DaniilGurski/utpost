@@ -46,9 +46,9 @@ const cma = async (method, path, { body, version, contentType } = {}) => {
 const notis = {
   name: 'Notis',
   description: 'En notis från redaktionen: driftinformation och varningar till besökarna.',
-  displayField: 'rubrik',
+  displayField: 'title',
   fields: [
-    { id: 'rubrik', name: 'Rubrik', type: 'Symbol', required: true, localized: false, validations: [{ size: { max: 80 } }] },
+    { id: 'title', name: 'Title', type: 'Symbol', required: true, localized: false, validations: [{ size: { max: 80 } }] },
     {
       id: 'text',
       name: 'Text',
@@ -60,10 +60,10 @@ const notis = {
         { enabledNodeTypes: ['hyperlink'], message: 'Bara stycken och länkar' },
       ],
     },
-    { id: 'niva', name: 'Nivå', type: 'Symbol', required: true, localized: false, validations: [{ in: ['info', 'varning'] }] },
+    { id: 'level', name: 'Level', type: 'Symbol', required: true, localized: false, validations: [{ in: ['info', 'varning'] }] },
     {
       id: 'guideSlug',
-      name: 'Gäller guide (slug)',
+      name: 'Applies to guide (slug)',
       type: 'Symbol',
       required: false,
       localized: false,
@@ -81,8 +81,8 @@ const notiser = [
     id: 'utpost-notis-1',
     publicera: true,
     fields: {
-      rubrik: 'Storforsbron är avstängd',
-      niva: 'varning',
+      title: 'Storforsbron är avstängd',
+      level: 'varning',
       text: dokument(
         stycke(text('Bron över Storforsen lagas till och med '), text('30 november', ['bold']), text('.')),
         stycke(text('Räkna med en omväg på tre kilometer.')),
@@ -93,8 +93,8 @@ const notiser = [
     id: 'utpost-notis-2',
     publicera: true,
     fields: {
-      rubrik: 'Vinterguiderna är på väg',
-      niva: 'info',
+      title: 'Vinterguiderna är på väg',
+      level: 'info',
       text: dokument(stycke(text('Redaktionen går igenom lederna inför vintern. Uppdaterade guider kommer i december.'))),
     },
   },
@@ -102,8 +102,8 @@ const notiser = [
     id: 'utpost-notis-3',
     publicera: false,
     fields: {
-      rubrik: 'Ny led till våren',
-      niva: 'info',
+      title: 'Ny led till våren',
+      level: 'info',
       text: dokument(stycke(text('Vi öppnar en ny led i Jämtland i maj. Mer information kommer.'))),
     },
   },
@@ -129,7 +129,7 @@ for (const n of notiser) {
   } else if (finns?.sys.publishedVersion) {
     await cma('DELETE', `/entries/${n.id}/published`, { version: post.sys.version });
   }
-  console.log(`✓ ${n.publicera ? 'publicerad' : 'utkast    '}  ${n.fields.rubrik}`);
+  console.log(`✓ ${n.publicera ? 'publicerad' : 'utkast    '}  ${n.fields.title}`);
 }
 
 console.log(`

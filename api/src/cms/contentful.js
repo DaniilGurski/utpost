@@ -51,12 +51,12 @@ export const toParagraphs = (document) => {
     .filter((paragraph) => paragraph.runs.length > 0);
 };
 
-// Contentfuls post → schemats Notice. Fälten heter som redaktionen kallar dem (rubrik, niva);
-// schemat håller sig till engelska som resten av API:et. Ett utkast kan sakna fält – därav ??.
+// Contentfuls post → schemats Notice. Fälten har engelska id:n (title, level), som resten av API:et.
+// Ett utkast kan sakna fält – därav ??.
 const toNotice = (entry, status = 'published') => ({
   id: entry.sys.id,
-  title: entry.fields?.rubrik ?? '',
-  level: entry.fields?.niva ?? 'info',
+  title: entry.fields?.title ?? '',
+  level: entry.fields?.level ?? 'info',
   body: toParagraphs(entry.fields?.text),
   guideSlug: entry.fields?.guideSlug ?? null,
   status,
