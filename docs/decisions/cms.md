@@ -53,6 +53,7 @@ Svar: när vi ändrar contentful delivery token försvinner notiserna och API lo
 
 Ungefär hur lång tid från publicera till synlig notis, utan webhook
 Svar:
+det gick snabbt, vi såg ändringen efter kanske 5s
 
 En gräns i gratisnivån som skulle få oss att byta, med länk till källan
 Svar:
