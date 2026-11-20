@@ -29,13 +29,13 @@ Vid avcheckningen: den som **inte** skrev routen visar PR:en och kör curl. Frå
 
 Direkt i repot. Inget i README. En avrundad siffra räcker.
 
-| # | Vad | När | Var |
-| - | --- | --- | --- |
-| 1 | Vilken nyckel läser vad, och var den ligger (delivery, preview, management) | steg 1 | `docs/decisions/cms.md` → _Konsekvenser_ |
-| 2 | Vad appen gör när Contentful inte svarar: loggraden + vad guidelistan visar | steg 1 | `docs/decisions/cms.md` → _Konsekvenser_ |
-| 3 | Ungefär hur lång tid från publicera till synlig notis, utan webhook | steg 2 | `docs/decisions/cms.md` → _Konsekvenser_ |
-| 4 | Testernas namn + länk till PR-körningen där Integration var rött | steg 3 | PR-beskrivningen (Canvas-inlämningen vill ha den PR:en) |
-| 5 | En gräns i gratisnivån som skulle få oss att byta, med länk till källan | medan ni väntar | `docs/decisions/cms.md` → _Vad som hade fått oss att byta_ |
+| #   | Vad                                                                         | När             | Var                                                        |
+| --- | --------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------- |
+| 1   | Vilken nyckel läser vad, och var den ligger (delivery, preview, management) | steg 1          | `docs/decisions/cms.md` → _Konsekvenser_                   |
+| 2   | Vad appen gör när Contentful inte svarar: loggraden + vad guidelistan visar | steg 1          | `docs/decisions/cms.md` → _Konsekvenser_                   |
+| 3   | Ungefär hur lång tid från publicera till synlig notis, utan webhook         | steg 2          | `docs/decisions/cms.md` → _Konsekvenser_                   |
+| 4   | Testernas namn + länk till PR-körningen där Integration var rött            | steg 3          | PR-beskrivningen (Canvas-inlämningen vill ha den PR:en)    |
+| 5   | En gräns i gratisnivån som skulle få oss att byta, med länk till källan     | medan ni väntar | `docs/decisions/cms.md` → _Vad som hade fått oss att byta_ |
 
 ---
 
@@ -60,42 +60,44 @@ Kedjan Contentful → vårt API → klienten finns redan i koden. Nu ska den fun
 
 ### Databaserna och testerna
 
-- [ ] ```bash
+- [ X ] ```bash
   docker compose up -d --wait postgres mongo
   npm run seed
   npm run migrate:logs
-  npm run test:api       # alla gröna – CMS:et är avstängt utan nycklar, det är meningen
+  npm run test:api # alla gröna – CMS:et är avstängt utan nycklar, det är meningen
+  ```
+
   ```
 
 ### `.env`
 
 Vår `.env` har **inga** `CONTENTFUL_*`-rader än (de kom med #190 i `.env.example`).
 
-- [ ] Kopiera CMS-blocket från `.env.example` till slutet av `.env`:
+- [ X ] Kopiera CMS-blocket från `.env.example` till slutet av `.env`:
   ```bash
   sed -n '/^# CMS (M9)/,/^CMS_CACHE_SECONDS/p' .env.example >> .env
   ```
 
-| Variabel | Var i Contentful | Hemlig? | Används av |
-| -------- | ---------------- | ------- | ---------- |
-| `CONTENTFUL_SPACE_ID` | _Settings > General settings > Space ID_ | nej | appen + `cms:setup` |
-| `CONTENTFUL_DELIVERY_TOKEN` | _Settings > API keys_ → _Content Delivery API – access token_ | **ja** | appen (bara publicerat) |
-| `CONTENTFUL_PREVIEW_TOKEN` | samma API key → _Content Preview API – access token_ | **ja** | appen (även utkast, bara redaktörens preview) |
-| `CONTENTFUL_MANAGEMENT_TOKEN` | _Settings > CMA tokens_ (personlig) | **ja** | **bara** `npm run cms:setup`. Aldrig till molnet |
-| `CMS_CACHE_SECONDS` | – | – | hur länge publicerade notiser svaras ur minnet (60) |
+| Variabel                      | Var i Contentful                                              | Hemlig? | Används av                                          |
+| ----------------------------- | ------------------------------------------------------------- | ------- | --------------------------------------------------- |
+| `CONTENTFUL_SPACE_ID`         | _Settings > General settings > Space ID_                      | nej     | appen + `cms:setup`                                 |
+| `CONTENTFUL_DELIVERY_TOKEN`   | _Settings > API keys_ → _Content Delivery API – access token_ | **ja**  | appen (bara publicerat)                             |
+| `CONTENTFUL_PREVIEW_TOKEN`    | samma API key → _Content Preview API – access token_          | **ja**  | appen (även utkast, bara redaktörens preview)       |
+| `CONTENTFUL_MANAGEMENT_TOKEN` | _Settings > CMA tokens_ (personlig)                           | **ja**  | **bara** `npm run cms:setup`. Aldrig till molnet    |
+| `CMS_CACHE_SECONDS`           | –                                                             | –       | hur länge publicerade notiser svaras ur minnet (60) |
 
 ### Spacet och management-token
 
 Hur ett space hänger ihop: [Contentful 101](https://www.contentful.com/help/getting-started/contentful-101/). Ett space med exempelinnehåll går också bra – `cms:setup` skapar bara sin egen innehållstyp och tre poster med fasta id:n.
 
-- [ ] Fyll i `CONTENTFUL_SPACE_ID`
-- [ ] Management-token: _Settings > CMA tokens > Create personal access token_
+- [ X ] Fyll i `CONTENTFUL_SPACE_ID`
+- [ X ] Management-token: _Settings > CMA tokens > Create personal access token_
   - visas **en gång**
   - utgångsdatum **efter onsdag 25/11**
   - **Authorize** för organisationen (i listan under _CMA tokens_) – annars 401
   - klistra in efter `CONTENTFUL_MANAGEMENT_TOKEN=`
   - hittar ni inte: [Contentful – autentisering](https://www.contentful.com/developers/docs/references/authentication/)
-- [ ] Skapa innehållstypen och notiserna (från repots rot):
+- [ X ] Skapa innehållstypen och notiserna (från repots rot):
   ```bash
   npm run cms:setup
   ```
@@ -103,11 +105,11 @@ Hur ett space hänger ihop: [Contentful 101](https://www.contentful.com/help/get
 
 ### Läsnycklarna och appen
 
-- [ ] _Settings > API keys > Add API key_. **Samma** nyckel har två värden → `CONTENTFUL_DELIVERY_TOKEN` och `CONTENTFUL_PREVIEW_TOKEN`
-- [ ] `npm run dev` → öppna `localhost:3001` (skickar vidare till `/guides`)
-- [ ] Logga in som `redaktor@utpost.se` / `hemligt123` → kryssa i _Förhandsgranska: visa utkast_
-- [ ] Logga ut, in som `medlem@utpost.se` → ingen kryssruta
-- [ ] **Rad 1:** skriv ner vilken nyckel läser vad
+- [ X ] _Settings > API keys > Add API key_. **Samma** nyckel har två värden → `CONTENTFUL_DELIVERY_TOKEN` och `CONTENTFUL_PREVIEW_TOKEN`
+- [ X ] `npm run dev` → öppna `localhost:3001` (skickar vidare till `/guides`)
+- [ X ] Logga in som `redaktor@utpost.se` / `hemligt123` → kryssa i _Förhandsgranska: visa utkast_
+- [ X ] Logga ut, in som `medlem@utpost.se` → ingen kryssruta
+- [ X ] **Rad 1:** skriv ner vilken nyckel läser vad
 
 ### När Contentful inte svarar (rad 2)
 
@@ -173,9 +175,9 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
   ```
 - [ ] `api/src/routes/routes.test.js` – **överst**, efter `import { sign } from '../lib/auth.js';`:
   ```js
-  import { vi } from 'vitest';
-  import { config } from '../config.js';
-  import { publishedNotices, clearCmsCache } from '../cms/contentful.js';
+  import { vi } from "vitest";
+  import { config } from "../config.js";
+  import { publishedNotices, clearCmsCache } from "../cms/contentful.js";
   ```
   (eller lägg `vi` i den befintliga `vitest`-importen på rad 2)
 - [ ] …och **sist i filen**:
@@ -184,36 +186,51 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
   ```js
   // Fredagens labb (M9): webhooken från CMS:et. Adressen är publik, så testerna gäller två saker:
   // att ingen kommer in utan hemligheten, och att rätt anrop faktiskt tömmer cachen.
-  describe('M9 – webhooken från CMS:et', () => {
-    const HEMLIGHET = 'en-lang-webhook-hemlighet-for-testerna';
-    const webhook = (headers = {}) => fetch(`${base}/api/cms/webhook`, { method: 'POST', headers });
+  describe("M9 – webhooken från CMS:et", () => {
+    const HEMLIGHET = "en-lang-webhook-hemlighet-for-testerna";
+    const webhook = (headers = {}) =>
+      fetch(`${base}/api/cms/webhook`, { method: "POST", headers });
 
-    it('utan hemlighet, med fel hemlighet eller när ingen är satt på servern: 401', async () => {
+    it("utan hemlighet, med fel hemlighet eller när ingen är satt på servern: 401", async () => {
       config.cmsWebhookSecret = HEMLIGHET;
       expect((await webhook()).status).toBe(401);
-      expect((await webhook({ 'X-Utpost-Webhook-Secret': 'fel' })).status).toBe(401);
-      config.cmsWebhookSecret = '';
-      expect((await webhook({ 'X-Utpost-Webhook-Secret': '' })).status).toBe(401);
+      expect((await webhook({ "X-Utpost-Webhook-Secret": "fel" })).status).toBe(
+        401,
+      );
+      config.cmsWebhookSecret = "";
+      expect((await webhook({ "X-Utpost-Webhook-Secret": "" })).status).toBe(
+        401,
+      );
     });
 
-    it('med rätt hemlighet töms cachen: nästa fråga hämtar från CMS:et igen', async () => {
-      Object.assign(config, { cmsWebhookSecret: HEMLIGHET, cmsSpaceId: 'space1', cmsDeliveryToken: 'nyckel' });
+    it("med rätt hemlighet töms cachen: nästa fråga hämtar från CMS:et igen", async () => {
+      Object.assign(config, {
+        cmsWebhookSecret: HEMLIGHET,
+        cmsSpaceId: "space1",
+        cmsDeliveryToken: "nyckel",
+      });
       clearCmsCache();
       const riktigFetch = globalThis.fetch;
       // Bara anropen till Contentful byts ut – testets egna anrop till API:et går som vanligt.
-      const contentful = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ items: [] }) }));
-      vi.stubGlobal('fetch', (url, options) =>
-        String(url).includes('contentful.com') ? contentful(url, options) : riktigFetch(url, options),
+      const contentful = vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ items: [] }),
+      }));
+      vi.stubGlobal("fetch", (url, options) =>
+        String(url).includes("contentful.com")
+          ? contentful(url, options)
+          : riktigFetch(url, options),
       );
-      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, "log").mockImplementation(() => {});
 
       await publishedNotices();
       await publishedNotices();
       expect(contentful).toHaveBeenCalledTimes(1); // andra frågan svarades ur cachen
 
       const res = await webhook({
-        'X-Utpost-Webhook-Secret': HEMLIGHET,
-        'X-Contentful-Topic': 'ContentManagement.Entry.publish',
+        "X-Utpost-Webhook-Secret": HEMLIGHET,
+        "X-Contentful-Topic": "ContentManagement.Entry.publish",
       });
       expect(res.status).toBe(204);
 
@@ -222,11 +239,16 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
 
       vi.unstubAllGlobals();
       vi.restoreAllMocks();
-      Object.assign(config, { cmsWebhookSecret: '', cmsSpaceId: '', cmsDeliveryToken: '' });
+      Object.assign(config, {
+        cmsWebhookSecret: "",
+        cmsSpaceId: "",
+        cmsDeliveryToken: "",
+      });
       clearCmsCache();
     });
   });
   ```
+
   </details>
 
 - [ ] Kör bara filen (databaserna ska vara igång) → **två röda**: `expected 404 to be 401` och `expected 404 to be 204`. Alla andra i filen gröna
@@ -247,10 +269,10 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
 
 - [ ] Ny fil `api/src/routes/cms.js`:
   ```js
-  import { Router } from 'express';
-  import crypto from 'node:crypto';
-  import { config } from '../config.js';
-  import { clearCmsCache } from '../cms/contentful.js';
+  import { Router } from "express";
+  import crypto from "node:crypto";
+  import { config } from "../config.js";
+  import { clearCmsCache } from "../cms/contentful.js";
 
   export const cmsRouter = Router();
 
@@ -262,18 +284,24 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
   // och Contentful känner till. Utan den: 401. Jämförelsen görs i konstant tid, så att svarstiden
   // inte avslöjar hur många tecken som var rätt. Är hemligheten inte satt på servern går ingen in.
   const sameSecret = (given) => {
-    const a = Buffer.from(String(given ?? ''));
+    const a = Buffer.from(String(given ?? ""));
     const b = Buffer.from(config.cmsWebhookSecret);
-    return b.length > 0 && a.length === b.length && crypto.timingSafeEqual(a, b);
+    return (
+      b.length > 0 && a.length === b.length && crypto.timingSafeEqual(a, b)
+    );
   };
 
-  cmsRouter.post('/webhook', (req, res) => {
-    if (!sameSecret(req.headers['x-utpost-webhook-secret'])) {
-      return res.status(401).json({ error: 'fel eller ingen webhook-hemlighet' });
+  cmsRouter.post("/webhook", (req, res) => {
+    if (!sameSecret(req.headers["x-utpost-webhook-secret"])) {
+      return res
+        .status(401)
+        .json({ error: "fel eller ingen webhook-hemlighet" });
     }
     clearCmsCache();
     // Contentful säger vad som hände i en header, t.ex. ContentManagement.Entry.publish
-    console.log(`cms: webhook (${req.headers['x-contentful-topic'] ?? 'okänt ämne'}) – cachen tömd`);
+    console.log(
+      `cms: webhook (${req.headers["x-contentful-topic"] ?? "okänt ämne"}) – cachen tömd`,
+    );
     res.status(204).end();
   });
   ```
@@ -297,7 +325,7 @@ Cachen skyddar oss mot Contentfuls tak men gör att redaktören väntar. Webhook
   ```
 - [ ] **`docker-compose.yml`** (inte `compose.yaml`) – under `api:` → `environment:`, efter `CONTENTFUL_PREVIEW_TOKEN`:
   ```yaml
-        CMS_WEBHOOK_SECRET: ${CMS_WEBHOOK_SECRET:-}
+  CMS_WEBHOOK_SECRET: ${CMS_WEBHOOK_SECRET:-}
   ```
 - [ ] Gröna tester:
   ```bash
@@ -369,11 +397,11 @@ Det här ska vi kunna säga med egna ord vid avcheckningen.
 
 ### Tre nycklar, tre rättigheter
 
-| API | Värd | Ger | Nyckel |
-| --- | ---- | --- | ------ |
-| Content Delivery | `cdn.contentful.com` | bara publicerat | delivery |
-| Content Preview | `preview.contentful.com` | senaste versionen, även utkast | preview (delivery funkar **inte**) |
-| Content Management | `api.contentful.com` | skriver | management – personlig, bara `cms:setup` lokalt. Läcker den kan någon skriva i spacet som oss |
+| API                | Värd                     | Ger                            | Nyckel                                                                                        |
+| ------------------ | ------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------- |
+| Content Delivery   | `cdn.contentful.com`     | bara publicerat                | delivery                                                                                      |
+| Content Preview    | `preview.contentful.com` | senaste versionen, även utkast | preview (delivery funkar **inte**)                                                            |
+| Content Management | `api.contentful.com`     | skriver                        | management – personlig, bara `cms:setup` lokalt. Läcker den kan någon skriva i spacet som oss |
 
 **Fråga 2 – varför ser en medlem aldrig utkasten?** Preview-nyckeln finns bara på servern. Kryssrutan ber bara om `notices(preview: true)`; det är **resolvern** (`Query.notices` i `resolvers.js`) som kräver rollen `editor` och annars svarar `FORBIDDEN`. Låg nyckeln i klienten kunde vem som helst läsa utkasten direkt från Contentful.
 
@@ -402,21 +430,21 @@ Det här ska vi kunna säga med egna ord vid avcheckningen.
 
 ## Felsökning
 
-| Symptom | Orsak / åtgärd |
-| ------- | -------------- |
-| Inga notiser, inget fel i loggen | Space-id eller delivery-nyckel saknas i `.env` → CMS:et avstängt med flit. Fyll i, starta om |
-| `Saknar CONTENTFUL_SPACE_ID eller CONTENTFUL_MANAGEMENT_TOKEN` | Kör `cms:setup` från repots rot, där `.env` ligger. Värdena i `.env`, inte bara i skalet |
-| `cms:setup` → 401/404 | `OrganizationAccessGrantRequired` → _CMA tokens_ → **Authorize**. Annars fel token/space-id (skapa ny token) |
-| `cms:setup` → 422 | Contentful underkände innehållstypen. Läs texten, säg till |
-| `cms: kunde inte hämta notiser (Contentful svarade …)` | Läs siffran. 401 = delivery och preview förväxlade? |
-| `cms: hämtade …` vid varje omladdning | Cachen fungerar inte – kolla `CMS_CACHE_SECONDS` |
-| Redaktören ser inget utkast | Preview-nyckeln saknas, inte inloggad som `redaktor@utpost.se`, eller token följer inte med (`fetchOptions` i `urql.ts`) |
-| Ändringen syns inte | Cachen (en minut), eller posten är _Changed_ men inte publicerad |
-| Notisen syns inte på guiden | Sluggen stämmer inte exakt, eller seedat om. Kopiera igen ur adressfältet |
-| _Gäller den här guiden_ leder ingenstans | `/guider/` i stället för `/guide/` i `NoticeList.vue` (se steg 2) |
-| Testerna gröna direkt i steg 3 | Routen finns redan: `git stash`, kör, se rött, `git stash pop` |
-| Andra tester röda efter webhooktestet | Stubben ligger kvar om testet föll mitt i. Laga det röda först |
-| curl → 401 fast rätt hemlighet | API:et startat före `.env`-raden, eller olika värden (`echo $CMS_WEBHOOK_SECRET`, `grep CMS_WEBHOOK .env`). Två rader i `.env`? Ta bort den tomma |
-| curl → 404 | Routen inte monterad i `app.js`, eller fel adress/metod (`POST /api/cms/webhook`) |
-| Portar upptagna (5433, 27017, 3001, 4000) | `docker ps`, `docker stop <namn>`, stoppa annan `npm run dev` |
-| `npm run typecheck` rött | `npm run codegen` (ingår i `typecheck`, men kolla att GraphQL-frågorna stämmer mot schemat) |
+| Symptom                                                        | Orsak / åtgärd                                                                                                                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inga notiser, inget fel i loggen                               | Space-id eller delivery-nyckel saknas i `.env` → CMS:et avstängt med flit. Fyll i, starta om                                                      |
+| `Saknar CONTENTFUL_SPACE_ID eller CONTENTFUL_MANAGEMENT_TOKEN` | Kör `cms:setup` från repots rot, där `.env` ligger. Värdena i `.env`, inte bara i skalet                                                          |
+| `cms:setup` → 401/404                                          | `OrganizationAccessGrantRequired` → _CMA tokens_ → **Authorize**. Annars fel token/space-id (skapa ny token)                                      |
+| `cms:setup` → 422                                              | Contentful underkände innehållstypen. Läs texten, säg till                                                                                        |
+| `cms: kunde inte hämta notiser (Contentful svarade …)`         | Läs siffran. 401 = delivery och preview förväxlade?                                                                                               |
+| `cms: hämtade …` vid varje omladdning                          | Cachen fungerar inte – kolla `CMS_CACHE_SECONDS`                                                                                                  |
+| Redaktören ser inget utkast                                    | Preview-nyckeln saknas, inte inloggad som `redaktor@utpost.se`, eller token följer inte med (`fetchOptions` i `urql.ts`)                          |
+| Ändringen syns inte                                            | Cachen (en minut), eller posten är _Changed_ men inte publicerad                                                                                  |
+| Notisen syns inte på guiden                                    | Sluggen stämmer inte exakt, eller seedat om. Kopiera igen ur adressfältet                                                                         |
+| _Gäller den här guiden_ leder ingenstans                       | `/guider/` i stället för `/guide/` i `NoticeList.vue` (se steg 2)                                                                                 |
+| Testerna gröna direkt i steg 3                                 | Routen finns redan: `git stash`, kör, se rött, `git stash pop`                                                                                    |
+| Andra tester röda efter webhooktestet                          | Stubben ligger kvar om testet föll mitt i. Laga det röda först                                                                                    |
+| curl → 401 fast rätt hemlighet                                 | API:et startat före `.env`-raden, eller olika värden (`echo $CMS_WEBHOOK_SECRET`, `grep CMS_WEBHOOK .env`). Två rader i `.env`? Ta bort den tomma |
+| curl → 404                                                     | Routen inte monterad i `app.js`, eller fel adress/metod (`POST /api/cms/webhook`)                                                                 |
+| Portar upptagna (5433, 27017, 3001, 4000)                      | `docker ps`, `docker stop <namn>`, stoppa annan `npm run dev`                                                                                     |
+| `npm run typecheck` rött                                       | `npm run codegen` (ingår i `typecheck`, men kolla att GraphQL-frågorna stämmer mot schemat)                                                       |
