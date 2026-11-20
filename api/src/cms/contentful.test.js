@@ -11,12 +11,12 @@ const document = (...content) => ({ nodeType: 'document', data: {}, content });
 const entry = (id, fields) => ({ sys: { id, updatedAt: '2026-11-18T08:00:00Z' }, fields });
 
 const avstangd = entry('n1', {
-  rubrik: 'Leden är avstängd',
-  niva: 'varning',
+  title: 'Leden är avstängd',
+  level: 'varning',
   guideSlug: 'norra-myrleden-7',
   text: document(paragraph(text('Bron vid '), text('Storforsen', ['bold']), text(' lagas.'))),
 });
-const valkommen = entry('n2', { rubrik: 'Välkommen', niva: 'info', text: document(paragraph(text('Hej!'))) });
+const valkommen = entry('n2', { title: 'Välkommen', level: 'info', text: document(paragraph(text('Hej!'))) });
 
 // Svarar som Contentful: { items: [...] }. svar kan vara en lista eller en funktion av adressen.
 const fakeContentful = (svar) =>
@@ -121,8 +121,8 @@ describe('publicerade notiser', () => {
 
 describe('förhandsgranskningen', () => {
   it('hämtar från preview-API:et med preview-nyckeln och säger vad som är utkast och vad som är ändrat', async () => {
-    const utkast = entry('n3', { rubrik: 'Ny led i vår', niva: 'info' }); // aldrig publicerad, och utan text än
-    const andrad = entry('n2', { ...valkommen.fields, rubrik: 'Välkommen tillbaka' }); // publicerad, sedan ändrad
+    const utkast = entry('n3', { title: 'Ny led i vår', level: 'info' }); // aldrig publicerad, och utan text än
+    const andrad = entry('n2', { ...valkommen.fields, title: 'Välkommen tillbaka' }); // publicerad, sedan ändrad
     const fetch = fakeContentful((url) => (url.startsWith('https://preview.contentful.com') ? [avstangd, andrad, utkast] : [avstangd, valkommen]));
     vi.stubGlobal('fetch', fetch);
 
