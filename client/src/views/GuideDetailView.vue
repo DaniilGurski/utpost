@@ -1,41 +1,55 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import type { Guide } from "@utpost/shared";
-import { get } from "../api";
+import { computed } from "vue";
+import { useQuery } from "@urql/vue";
+import NoticeList from "../components/NoticeList.vue";
+import { graphql } from "../gql";
 
 const props = defineProps<{ slug: string }>();
 
-const guide = ref<Guide | null>(null);
-const loading = ref(true);
-const notFound = ref(false);
-const error = ref("");
-
-onMounted(async () => {
-  const result = await get<Guide>(`/guides/${props.slug}`);
-  loading.value = false;
-
-  if (!result.ok) {
-    if (result.error.status === 404) notFound.value = true;
-    else error.value = result.error.message;
-    return;
-  }
-
-  guide.value = result.value;
+const { data, fetching, error } = useQuery({
+  query: graphql(`
+    query GuideDetails($slug: String!) {
+      guide(slug: $slug) {
+        title
+        region
+        difficulty
+        lengthKm
+        bodyHtml
+        notices {
+          id
+          title
+          level
+          status
+          guideSlug
+          body {
+            runs {
+              text
+              bold
+              italic
+              href
+            }
+          }
+        }
+      }
+    }
+  `),
+  variables: computed(() => ({ slug: props.slug })),
 });
+
+const guide = computed(() => data.value?.guide ?? null);
 </script>
 
 <template>
-  <p v-if="error">{{ error }}</p>
-  <p v-else-if="loading">Laddar...</p>
-  <p v-else-if="notFound || !guide">Guiden finns inte.</p>
+  <p v-if="error">{{ error.message }}</p>
+  <p v-else-if="fetching || !data">Laddar...</p>
+  <p v-else-if="!guide">Guiden finns inte.</p>
 
   <div v-else>
     <h1>{{ guide.title }}</h1>
-    <p>
-      {{ guide.region }} · {{ guide.difficulty }} · {{ guide.length_km }} km
-    </p>
+    <p>{{ guide.region }} · {{ guide.difficulty }} · {{ guide.lengthKm }} km</p>
+    <NoticeList :notices="guide.notices" />
     <!-- Guidetexten skrivs av redaktionen och litas på, så den saneras inte -->
-    <div v-html="guide.body_html"></div>
+    <div v-html="guide.bodyHtml"></div>
   </div>
 </template>
 

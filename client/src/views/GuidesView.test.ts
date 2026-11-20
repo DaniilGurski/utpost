@@ -1,41 +1,91 @@
-import type { Guide } from "@utpost/shared";
+import type { User } from "@utpost/shared";
+import { ref, unref } from "vue";
+import { createPinia, setActivePinia } from "pinia";
 import { cleanup, fireEvent, render, screen } from "@testing-library/vue";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useQuery } from "@urql/vue";
+import { useAuthStore } from "../stores/auth";
 import GuidesView from "./GuidesView.vue";
 
-const fetchMock = vi.fn();
-vi.stubGlobal("fetch", fetchMock);
+// Bara useQuery byts ut, resten av @urql/vue fungerar som vanligt
+vi.mock("@urql/vue", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@urql/vue")>()),
+  useQuery: vi.fn(),
+}));
 
-const makeGuide = (title: string, id = 0): Guide => ({
-  id,
+const mockedUseQuery = vi.mocked(useQuery);
+
+const makeGuide = (title: string, id = 0) => ({
+  id: String(id),
   title,
   slug: title.split(" ").join("-").toLowerCase(),
   region: "",
   difficulty: "",
-  length_km: 10,
-  body_html: "",
-  hero_image: "",
-  published: true,
-  author_id: 0,
-  updated_at: "",
+  lengthKm: 10,
+  bodyHtml: "",
 });
 
-const respondWith = (body: unknown, status = 200) =>
-  fetchMock.mockResolvedValue(new Response(JSON.stringify(body), { status }));
+const makeNotice = (title: string, status = "published") => ({
+  id: title,
+  title,
+  level: "info",
+  status,
+  guideSlug: null,
+  body: [{ runs: [{ text: `${title} text`, bold: false, italic: false }] }],
+});
+
+const respondWith = (result: {
+  data?: unknown;
+  fetching?: boolean;
+  error?: { message: string };
+}) =>
+  mockedUseQuery.mockReturnValue({
+    data: ref(result.data),
+    fetching: ref(result.fetching ?? false),
+    error: ref(result.error),
+  } as unknown as ReturnType<typeof useQuery>);
+
+const respondWithGuides = (
+  guides: ReturnType<typeof makeGuide>[],
+  notices: ReturnType<typeof makeNotice>[] = [],
+) => respondWith({ data: { guides, notices } });
+
+let pinia: ReturnType<typeof createPinia>;
+
+const loginAs = (role: string) => {
+  const user: User = {
+    id: 1,
+    email: "a@example.com",
+    display_name: "A",
+    role,
+    created_at: "",
+  };
+  useAuthStore().user = user;
+};
 
 const renderView = () =>
   render(GuidesView, {
-    global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    global: {
+      plugins: [pinia],
+      stubs: { RouterLink: { template: "<a><slot /></a>" } },
+    },
   });
+
+const lastArgs = () => mockedUseQuery.mock.calls.at(-1)![0];
+
+beforeEach(() => {
+  pinia = createPinia();
+  setActivePinia(pinia);
+});
 
 afterEach(() => {
   cleanup();
-  fetchMock.mockReset();
+  mockedUseQuery.mockReset();
 });
 
 describe("GuidesView", () => {
   it("filters guides by title when searching", async () => {
-    respondWith([
+    respondWithGuides([
       makeGuide("Kungsleden", 1),
       makeGuide("Sarek", 2),
       makeGuide("Kebnekaise", 3),
@@ -51,7 +101,7 @@ describe("GuidesView", () => {
   });
 
   it("shows the hit count after a search", async () => {
-    respondWith([
+    respondWithGuides([
       makeGuide("Kungsleden", 1),
       makeGuide("Kungsleden Syd", 2),
       makeGuide("Sarek", 3),
@@ -65,7 +115,7 @@ describe("GuidesView", () => {
   });
 
   it("shows 'Inga träffar' when no guide matches the search", async () => {
-    respondWith([makeGuide("Kungsleden", 1)]);
+    respondWithGuides([makeGuide("Kungsleden", 1)]);
     renderView();
 
     await screen.findByText("Kungsleden");
@@ -75,11 +125,52 @@ describe("GuidesView", () => {
     expect(screen.queryByText("Kungsleden")).not.toBeInTheDocument();
   });
 
-  it("shows the error message when the API fails", async () => {
-    respondWith({ error: "Databasen är nere" }, 500);
+  it("shows the error message when GraphQL returns an error", async () => {
+    respondWith({ error: { message: "Databasen är nere" } });
     renderView();
 
     expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
     expect(screen.queryByText("Laddar...")).not.toBeInTheDocument();
+  });
+
+  it("shows the notices from the query", async () => {
+    respondWithGuides([], [makeNotice("Stängd stuga")]);
+    renderView();
+
+    expect(
+      await screen.findByRole("heading", { name: "Stängd stuga" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Stängd stuga text")).toBeInTheDocument();
+  });
+
+  it("asks for published notices from the cache by default", () => {
+    respondWithGuides([]);
+    renderView();
+
+    expect(unref(lastArgs().variables)).toEqual({ preview: false });
+    expect(unref(lastArgs().requestPolicy)).toBe("cache-first");
+  });
+
+  it("hides the preview checkbox from members", () => {
+    loginAs("user");
+    respondWithGuides([]);
+    renderView();
+
+    expect(
+      screen.queryByLabelText("Förhandsgranska: visa utkast"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("lets an editor ask for drafts over the network", async () => {
+    loginAs("editor");
+    respondWithGuides([]);
+    renderView();
+
+    await fireEvent.click(
+      screen.getByLabelText("Förhandsgranska: visa utkast"),
+    );
+
+    expect(unref(lastArgs().variables)).toEqual({ preview: true });
+    expect(unref(lastArgs().requestPolicy)).toBe("network-only");
   });
 });

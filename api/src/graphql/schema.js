@@ -13,6 +13,7 @@ export const typeDefs = /* GraphQL */ `
     title: String!
     region: String!
     difficulty: String!
+    lengthKm: Float!
     bodyHtml: String!
     heroImage: String
     published: Boolean!

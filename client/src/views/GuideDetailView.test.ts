@@ -1,39 +1,59 @@
-import type { Guide } from "@utpost/shared";
+import { ref, unref } from "vue";
 import { cleanup, render, screen } from "@testing-library/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { useQuery } from "@urql/vue";
 import GuideDetailView from "./GuideDetailView.vue";
 
-const fetchMock = vi.fn();
-vi.stubGlobal("fetch", fetchMock);
+// Bara useQuery byts ut, resten av @urql/vue fungerar som vanligt
+vi.mock("@urql/vue", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@urql/vue")>()),
+  useQuery: vi.fn(),
+}));
 
-const guide: Guide = {
-  id: 1,
+const mockedUseQuery = vi.mocked(useQuery);
+
+const guide = {
   title: "Kungsleden",
-  slug: "kungsleden",
   region: "Lappland",
   difficulty: "medel",
-  length_km: 12,
-  body_html: "<p>Gå norrut.</p>",
-  hero_image: "",
-  published: true,
-  author_id: 0,
-  updated_at: "",
+  lengthKm: 12,
+  bodyHtml: "<p>Gå norrut.</p>",
+  notices: [] as unknown[],
 };
 
-const respondWith = (body: unknown, status = 200) =>
-  fetchMock.mockResolvedValue(new Response(JSON.stringify(body), { status }));
+const respondWith = (result: {
+  data?: unknown;
+  fetching?: boolean;
+  error?: { message: string };
+}) =>
+  mockedUseQuery.mockReturnValue({
+    data: ref(result.data),
+    fetching: ref(result.fetching ?? false),
+    error: ref(result.error),
+  } as unknown as ReturnType<typeof useQuery>);
 
 const renderView = () =>
-  render(GuideDetailView, { props: { slug: "kungsleden" } });
+  render(GuideDetailView, {
+    props: { slug: "kungsleden" },
+    global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+  });
 
 afterEach(() => {
   cleanup();
-  fetchMock.mockReset();
+  mockedUseQuery.mockReset();
 });
 
 describe("GuideDetailView", () => {
+  it("queries the guide with the slug from the prop", () => {
+    respondWith({ fetching: true });
+    renderView();
+
+    const args = mockedUseQuery.mock.calls[0]![0];
+    expect(unref(args.variables)).toEqual({ slug: "kungsleden" });
+  });
+
   it("shows title, region, difficulty, length and body for the slug", async () => {
-    respondWith(guide);
+    respondWith({ data: { guide } });
     renderView();
 
     expect(
@@ -41,21 +61,51 @@ describe("GuideDetailView", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Lappland · medel · 12 km")).toBeInTheDocument();
     expect(screen.getByText("Gå norrut.")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith("/api/guides/kungsleden", {
-      headers: {},
-    });
   });
 
-  it("shows 'Guiden finns inte.' when the API returns 404", async () => {
-    respondWith({ error: "hittades inte" }, 404);
+  it("shows the guide's notices", async () => {
+    respondWith({
+      data: {
+        guide: {
+          ...guide,
+          notices: [
+            {
+              id: "n1",
+              title: "Bron är borta",
+              level: "varning",
+              status: "published",
+              guideSlug: "kungsleden",
+              body: [
+                {
+                  runs: [
+                    { text: "Vada vid", bold: false, italic: false },
+                    { text: " Abisko", bold: true, italic: false },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    renderView();
+
+    expect(
+      await screen.findByRole("heading", { name: "Bron är borta" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Abisko").tagName).toBe("STRONG");
+  });
+
+  it("shows 'Guiden finns inte.' when the guide is null", async () => {
+    respondWith({ data: { guide: null } });
     renderView();
 
     expect(await screen.findByText("Guiden finns inte.")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
   });
 
-  it("shows the error message for other errors", async () => {
-    respondWith({ error: "Databasen är nere" }, 500);
+  it("shows the error message when GraphQL returns an error", async () => {
+    respondWith({ error: { message: "Databasen är nere" } });
     renderView();
 
     expect(await screen.findByText("Databasen är nere")).toBeInTheDocument();
@@ -64,7 +114,7 @@ describe("GuideDetailView", () => {
   });
 
   it("shows 'Laddar...' while fetching", async () => {
-    fetchMock.mockReturnValue(new Promise(() => {}));
+    respondWith({ fetching: true });
     renderView();
 
     expect(await screen.findByText("Laddar...")).toBeInTheDocument();
