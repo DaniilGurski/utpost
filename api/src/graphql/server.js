@@ -5,6 +5,7 @@ import { schema } from "./schema.js";
 import { verifyAuthHeader } from "../lib/auth.js";
 import { createLoaders } from "./loaders.js";
 import { db } from "../db/client.js";
+import { publishedNotices, previewNotices } from "../cms/contentful.js";
 
 // Skriver ut antalet databasfrågor per GraphQL-operation, t.ex.
 // "[graphql] Tours: 151 databasfrågor, 87 ms". Underlag för beslutsdokumentet.
@@ -44,6 +45,8 @@ export const yoga = createYoga({
     return {
       loaders: createLoaders(db),
       user: verifyAuthHeader(request.headers.get("authorization")),
+      // M9: CMS:et i context, bredvid databasen. Resolvers vet inte vilket CMS det är.
+      cms: { notices: publishedNotices, previewNotices },
     };
   },
 });

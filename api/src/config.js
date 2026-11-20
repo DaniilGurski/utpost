@@ -13,4 +13,11 @@ export const config = {
     process.env.IMAGE_FUNCTION_URL || "http://localhost:7071/api/process-image",
   // Tom lokalt: func start kontrollerar ingen nyckel.
   imageFunctionKey: process.env.IMAGE_FUNCTION_KEY ?? "",
+  // M9: headless CMS (cms/contentful.js). Space-id:t är ingen hemlighet, nycklarna är det.
+  // Saknas de är CMS:et avstängt och appen kör utan notiser.
+  cmsSpaceId: process.env.CONTENTFUL_SPACE_ID ?? "",
+  cmsEnvironment: process.env.CONTENTFUL_ENVIRONMENT || "master",
+  cmsDeliveryToken: process.env.CONTENTFUL_DELIVERY_TOKEN ?? "",
+  cmsPreviewToken: process.env.CONTENTFUL_PREVIEW_TOKEN ?? "",
+  cmsCacheSeconds: Number(process.env.CMS_CACHE_SECONDS ?? 60),
 };

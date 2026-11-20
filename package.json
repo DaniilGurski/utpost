@@ -18,6 +18,7 @@
     "format:write": "npm run format:write -w client",
     "mongo:smoke": "npm run mongo:smoke -w api",
     "migrate:logs": "npm run migrate:logs -w api",
+    "cms:setup": "node --env-file-if-exists=.env scripts/cms-setup.mjs",
     "test": "npm run test -w client",
     "test:api": "npm run test -w api",
     "build": "npm run build -w client",
