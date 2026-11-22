@@ -19,6 +19,7 @@
     "mongo:smoke": "npm run mongo:smoke -w api",
     "migrate:logs": "npm run migrate:logs -w api",
     "cms:setup": "node --env-file-if-exists=.env scripts/cms-setup.mjs",
+    "cms:migrate-guides": "node --env-file-if-exists=.env scripts/migrate-guides.mjs",
     "test": "npm run test -w client",
     "test:api": "npm run test -w api",
     "build": "npm run build -w client",
