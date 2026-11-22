@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { config } from '../config.js';
-import { toParagraphs, publishedNotices, previewNotices, clearCmsCache } from './contentful.js';
+import { toParagraphs, toBlocks, publishedNotices, previewNotices, guideBody, clearCmsCache } from './contentful.js';
 
 // Enhetstester för CMS-lagret (M9). Contentful anropas aldrig: fetch byts mot en funktion som
 // svarar med det Contentful skulle ha svarat. Så går testerna i pipelinen utan nycklar och
@@ -136,5 +136,86 @@ describe('förhandsgranskningen', () => {
     expect(notices[2].body).toEqual([]);
     const preview = fetch.mock.calls.find(([url]) => url.startsWith('https://preview.contentful.com'));
     expect(preview[1].headers.Authorization).toBe('Bearer preview-nyckel');
+  });
+});
+
+describe('rich text → guidens block (#198)', () => {
+  const heading = (nodeType, value) => ({ nodeType, data: {}, content: [text(value)] });
+  const listItem = (...content) => ({ nodeType: 'list-item', data: {}, content: [paragraph(...content)] });
+  const list = (...items) => ({ nodeType: 'unordered-list', data: {}, content: items });
+  const run = (value, italic = false) => ({ text: value, bold: false, italic, href: null });
+
+  it('rubriker, stycken och punktlistor blir block med typ', () => {
+    const doc = document(
+      heading('heading-2', 'Vintertid'),
+      paragraph(text('En av de mest omtyckta lederna.')),
+      heading('heading-3', 'Bra att veta'),
+      list(listItem(text('Vindskydd')), listItem(text('Ingen '), text('service', ['italic']))),
+    );
+    expect(toBlocks(doc)).toEqual([
+      { type: 'HEADING_2', runs: [run('Vintertid')], items: null },
+      { type: 'PARAGRAPH', runs: [run('En av de mest omtyckta lederna.')], items: null },
+      { type: 'HEADING_3', runs: [run('Bra att veta')], items: null },
+      { type: 'LIST', runs: [], items: [[run('Vindskydd')], [run('Ingen '), run('service', true)]] },
+    ]);
+  });
+
+  it('blocktyper vi inte renderar och tomma stycken hoppas över', () => {
+    const citat = { nodeType: 'blockquote', data: {}, content: [paragraph(text('Citat'))] };
+    expect(toBlocks(document(citat, paragraph(), paragraph(text('Stycke'))))).toHaveLength(1);
+    expect(toBlocks(undefined)).toEqual([]);
+  });
+});
+
+describe('guidernas text (#198)', () => {
+  const guide = (id, value) => entry(id, { internalTitle: 'x', body: document(paragraph(text(value))) });
+
+  it('hämtas med ett anrop för alla guider och slås upp på guide-<id i Postgres>', async () => {
+    const fetch = fakeContentful((url) => (url.includes('content_type=guide') ? [guide('guide-7', 'Sju'), guide('guide-8', 'Åtta')] : []));
+    vi.stubGlobal('fetch', fetch);
+
+    const [sju, atta, saknas] = await Promise.all([guideBody(7), guideBody(8), guideBody(9)]);
+
+    expect(sju).toEqual([{ type: 'PARAGRAPH', runs: [{ text: 'Sju', bold: false, italic: false, href: null }], items: null }]);
+    expect(atta[0].runs[0].text).toBe('Åtta');
+    expect(saknas).toBeNull(); // ingen post i Contentful (inte migrerad, eller borttagen)
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(String(fetch.mock.calls[0][0])).toContain('https://cdn.contentful.com/spaces/space1/environments/master/entries?content_type=guide');
+  });
+
+  it('cachas separat från notiserna, och webhooken (clearCmsCache) tömmer båda', async () => {
+    const fetch = fakeContentful((url) => (url.includes('content_type=guide') ? [guide('guide-1', 'Ett')] : [valkommen]));
+    vi.stubGlobal('fetch', fetch);
+    await guideBody(1);
+    await publishedNotices();
+    await guideBody(1);
+    await publishedNotices();
+    expect(fetch).toHaveBeenCalledTimes(2);
+
+    clearCmsCache();
+    await guideBody(1);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('är CMS:et nere svarar vi med det senast hämtade, eller null – aldrig ett fel', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const nere = vi.fn(async () => ({ ok: false, status: 503, json: async () => ({}) }));
+    vi.stubGlobal('fetch', nere);
+    expect(await guideBody(1)).toBeNull();
+
+    vi.stubGlobal('fetch', fakeContentful([guide('guide-1', 'Ett')]));
+    expect(await guideBody(1)).toHaveLength(1);
+    config.cmsCacheSeconds = 0;
+    vi.stubGlobal('fetch', nere);
+    expect(await guideBody(1)).toHaveLength(1);
+    config.cmsCacheSeconds = 60;
+  });
+
+  it('utan space och nyckel är CMS:et avstängt: null, inget anrop', async () => {
+    Object.assign(config, { cmsSpaceId: '', cmsDeliveryToken: '' });
+    const fetch = fakeContentful([guide('guide-1', 'Ett')]);
+    vi.stubGlobal('fetch', fetch);
+    expect(await guideBody(1)).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
