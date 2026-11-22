@@ -7,6 +7,7 @@ import {
 } from "../data/tours.js";
 import { listGuides, getGuideBySlug } from "../data/guides.js";
 import { GraphQLError } from "graphql/error";
+import { excerpt } from "./excerpt.js";
 
 const MAX_TOURS = 200;
 
@@ -51,6 +52,9 @@ export const resolvers = {
     bodyHtml: (guide) => guide.body_html,
     heroImage: (guide) => guide.hero_image,
     updatedAt: (guide) => iso(guide.updated_at),
+    // #198: guiden bor i Postgres, texten i CMS:et – id:t kopplar ihop dem (cms vet hur).
+    body: (guide, _, { cms }) => cms.guideBody(guide.id),
+    excerpt: async (guide, _, { cms }) => excerpt(await cms.guideBody(guide.id)),
     // M9: guiden bor i Postgres, notisen i CMS:et – sluggen kopplar ihop dem.
     notices: async (guide, _, { cms }) =>
       (await cms.notices()).filter((notice) => notice.guideSlug === guide.slug),
