@@ -14,7 +14,11 @@ export const typeDefs = /* GraphQL */ `
     region: String!
     difficulty: String!
     lengthKm: Float!
-    bodyHtml: String!
+    bodyHtml: String! @deprecated(reason: "Använd body. Tas bort i #199 när klienten slutat fråga efter den.")
+    "Guidens text ur CMS:et (#198). null = texten saknas i Contentful, eller CMS:et är nere/avstängt"
+    body: [Block!]
+    "Ren text ur första stycket, högst ~180 tecken. Räknas fram i API:et. null när body är null"
+    excerpt: String
     heroImage: String
     published: Boolean!
     updatedAt: String!
@@ -33,6 +37,23 @@ export const typeDefs = /* GraphQL */ `
 
   type Paragraph {
     runs: [TextRun!]!
+  }
+
+  "Vad ett block i guidens text ÄR – klienten bestämmer hur det ser ut"
+  enum BlockType {
+    PARAGRAPH
+    HEADING_2
+    HEADING_3
+    LIST
+  }
+
+  "Ett block i guidens text (#198)"
+  type Block {
+    type: BlockType!
+    "PARAGRAPH, HEADING_2, HEADING_3 (tom för LIST)"
+    runs: [TextRun!]!
+    "Bara LIST: en rad textbitar per listpunkt"
+    items: [[TextRun!]!]
   }
 
   "En notis från redaktionen. Innehållet bor i CMS:et (M9), inte i databasen."

@@ -156,4 +156,26 @@ describe("GraphQL API against a real database", () => {
     });
     expect(somMedlem.errors[0].extensions.code).toBe("FORBIDDEN");
   });
+
+  // #198: guidens text kommer ur CMS:et. Utan CMS (som i testerna) är body och excerpt null –
+  // men guiden finns, och allt som bor i Postgres går att läsa.
+  it("guide: body och excerpt är null utan CMS, resten av guiden kommer ur Postgres", async () => {
+    const { data, errors } = await graphql(
+      "{ guides { slug title region body { type } excerpt } }",
+    );
+    expect(errors).toBeUndefined();
+    expect(data.guides).toHaveLength(40);
+    for (const guide of data.guides) {
+      expect(guide.title).toEqual(expect.any(String));
+      expect(guide.body).toBeNull();
+      expect(guide.excerpt).toBeNull();
+    }
+  });
+
+  it("seeden ger samma titel och slug varje gång (guide 7 = Lilla Hällstigen 7)", async () => {
+    const { data } = await graphql(
+      '{ guide(slug: "lilla-hallstigen-7") { title region } }',
+    );
+    expect(data.guide).toEqual({ title: "Lilla Hällstigen 7", region: "Härjedalen" });
+  });
 });

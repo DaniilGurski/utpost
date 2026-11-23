@@ -79,9 +79,14 @@ export const run = async () => {
   }
 
   const guideIds = [];
+  // M9: titel, slug och region räknas fram ur i, inte med Math.random(). Staging seedar om vid
+  // varje kallstart, och guidetexten (som nämner titel och region) bor nu i Contentful under
+  // id guide-<id>. Slumpade de om skulle texten och notisernas guideSlug inte längre stämma.
+  const PREFIX = ["Stora", "Lilla", "Norra", "Södra", "Gamla"];
+  const NAME = ["Björnleden", "Hällstigen", "Sjörundan", "Myrleden", "Klippstigen"];
   for (let i = 0; i < 40; i++) {
-    const region = pick(REGIONS);
-    const title = `${pick(["Stora", "Lilla", "Norra", "Södra", "Gamla"])} ${pick(["Björnleden", "Hällstigen", "Sjörundan", "Myrleden", "Klippstigen"])} ${i + 1}`;
+    const region = REGIONS[i % REGIONS.length];
+    const title = `${PREFIX[i % PREFIX.length]} ${NAME[Math.floor(i / PREFIX.length) % NAME.length]} ${i + 1}`;
     const res = await pool.query(
       `insert into guides (slug, title, region, difficulty, length_km, body_html, hero_image, published, author_id)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`,

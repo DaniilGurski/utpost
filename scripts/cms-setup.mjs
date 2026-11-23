@@ -1,44 +1,16 @@
 #!/usr/bin/env node
-// M9: sätter upp innehållstypen Notis och tre notiser i ert eget Contentful-space.
+// M9: sätter upp innehållstyperna Notis och Guide, och tre notiser, i ert eget Contentful-space.
 //
 //   npm run cms:setup
 //
-// Kräver två rader i .env (se .env.example):
-//   CONTENTFUL_SPACE_ID          – Settings > General settings > Space ID
-//   CONTENTFUL_MANAGEMENT_TOKEN  – Settings > CMA tokens > Create personal access token
+// Kräver CONTENTFUL_SPACE_ID och CONTENTFUL_MANAGEMENT_TOKEN i .env (se cma.mjs).
 //
 // Skriptet pratar med Contentfuls Content Management API (api.contentful.com): det tredje API:et,
 // det som SKRIVER. Appen använder det aldrig – den läser bara, med delivery- och preview-nyckeln.
-// Går att köra flera gånger: innehållstypen och notiserna har fasta id:n och uppdateras på plats.
+// Går att köra flera gånger: innehållstyperna och notiserna har fasta id:n och uppdateras på plats.
 // Två notiser publiceras, den tredje lämnas som utkast (den syns bara i förhandsgranskningen).
-const space = process.env.CONTENTFUL_SPACE_ID;
-const token = process.env.CONTENTFUL_MANAGEMENT_TOKEN;
-const environment = process.env.CONTENTFUL_ENVIRONMENT ?? 'master';
-if (!space || !token) {
-  console.error('Saknar CONTENTFUL_SPACE_ID eller CONTENTFUL_MANAGEMENT_TOKEN i .env – se .env.example.');
-  process.exit(1);
-}
-const base = `https://api.contentful.com/spaces/${space}/environments/${environment}`;
-const paus = (ms) => new Promise((r) => setTimeout(r, ms));
-
-// Ett anrop till CMA. version = postens nuvarande version: Contentful vägrar skriva över något
-// som har ändrats sedan man läste det (409), så varje ändring måste säga vilken version den utgår från.
-const cma = async (method, path, { body, version, contentType } = {}) => {
-  await paus(200); // gratisnivån tillåter sju skrivningar i sekunden – vi håller oss långt under
-  const res = await fetch(base + path, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/vnd.contentful.management.v1+json',
-      ...(version !== undefined ? { 'X-Contentful-Version': String(version) } : {}),
-      ...(contentType ? { 'X-Contentful-Content-Type': contentType } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 404 && method === 'GET') return null;
-  if (!res.ok) throw new Error(`${method} ${path} → ${res.status}: ${(await res.text()).slice(0, 400)}`);
-  return res.status === 204 ? null : res.json();
-};
+// Guiderna själva läggs in av npm run cms:migrate-guides.
+import { space, environment, defaultLocale, upsertContentType, upsertEntry } from './cma.mjs';
 
 // Innehållsmodellen: fälten säger vad en notis ÄR. Nivån är ett val mellan två värden, inte en
 // färg. Texten får innehålla fet, kursiv och länkar – inga rubriker, bilder eller tabeller –
@@ -109,26 +81,40 @@ const notiser = [
   },
 ];
 
-const locales = await cma('GET', '/locales');
-const locale = locales.items.find((l) => l.default).code;
+// Guiden (#198): bara texten bor i Contentful. Titel, slug, region, svårighet, längd och bild är
+// fakta om leden och ligger kvar i Postgres. internalTitle finns bara för att redaktören ska hitta
+// rätt post i listan – appen läser det aldrig. Posten heter guide-<id i Postgres>.
+// Texten får rubriker (två nivåer), punktlistor och kursiv – det guiderna har i dag.
+const guide = {
+  name: 'Guide',
+  description: 'Texten till en guide. Fakta om leden (titel, region, längd …) ligger i Utposts databas; posten guide-7 hör till guide 7 där.',
+  displayField: 'internalTitle',
+  fields: [
+    { id: 'internalTitle', name: 'Internal title (only for finding the guide here)', type: 'Symbol', required: true, localized: false },
+    {
+      id: 'body',
+      name: 'Body',
+      type: 'RichText',
+      required: true,
+      localized: false,
+      validations: [
+        { enabledMarks: ['italic'], message: 'Bara kursiv text' },
+        { enabledNodeTypes: ['heading-2', 'heading-3', 'unordered-list'], message: 'Bara stycken, rubriker och punktlistor' },
+      ],
+    },
+  ],
+};
+
+const locale = await defaultLocale();
 console.log(`Space ${space}, miljö ${environment}, språk ${locale}`);
 
-// Innehållstypen: skapa eller uppdatera, och aktivera (en innehållstyp måste aktiveras innan den går att använda).
-const befintlig = await cma('GET', '/content_types/notis');
-const typ = await cma('PUT', '/content_types/notis', { body: notis, version: befintlig?.sys.version });
-await cma('PUT', '/content_types/notis/published', { version: typ.sys.version });
+await upsertContentType('notis', notis);
 console.log(`✓ innehållstypen Notis (${notis.fields.length} fält)`);
+await upsertContentType('guide', guide);
+console.log(`✓ innehållstypen Guide (${guide.fields.length} fält)`);
 
-// Notiserna. Varje fält är ett värde per språk, därav { [locale]: värde }.
 for (const n of notiser) {
-  const fields = Object.fromEntries(Object.entries(n.fields).map(([falt, varde]) => [falt, { [locale]: varde }]));
-  const finns = await cma('GET', `/entries/${n.id}`);
-  const post = await cma('PUT', `/entries/${n.id}`, { body: { fields }, version: finns?.sys.version, contentType: 'notis' });
-  if (n.publicera) {
-    await cma('PUT', `/entries/${n.id}/published`, { version: post.sys.version });
-  } else if (finns?.sys.publishedVersion) {
-    await cma('DELETE', `/entries/${n.id}/published`, { version: post.sys.version });
-  }
+  await upsertEntry({ id: n.id, contentType: 'notis', locale, fields: n.fields, publicera: n.publicera });
   console.log(`✓ ${n.publicera ? 'publicerad' : 'utkast    '}  ${n.fields.title}`);
 }
 
@@ -137,4 +123,5 @@ Klart. Nu behöver appen två nycklar till, de som LÄSER:
   Settings > API keys > Add API key. Kopiera till .env:
     CONTENTFUL_DELIVERY_TOKEN  = Content Delivery API – access token   (bara publicerat)
     CONTENTFUL_PREVIEW_TOKEN   = Content Preview API – access token    (även utkast)
-Starta om API:et (npm run dev) och öppna startsidan.`);
+Starta om API:et (npm run dev) och öppna startsidan.
+Guiderna: npm run cms:migrate-guides.`);
