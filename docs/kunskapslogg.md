@@ -343,11 +343,18 @@ Nej.
 
 Fullstack 9:
 
+Guiderna i Utpost har legat som HTML i Postgres och den som ansvarar för redaktionellt innehåll var tvungen att be utvecklare om hjälp för att publicera ändringar. Med hjälp av ett headless CMS som Contentful kan en redaktör skriva egna ändringar och notiser och publicera i appen. Med en webhook kan Contentful meddela när något har publicerats och via ett API skickas detta till klienten och ändringen syns nästan direkt i appen. Har något redan hämtats finns det sparat i en cache och det kortar väntetiden för användare och gör antal anrop färre. Detta är bra eftersom gratisversionen av Contentful har begränsat antal anrop. När något nytt publiceras rensas cachen av webhooken.
+
 ### Var det syns i mitt arbete
 
 Fullstack 9:
 
+webhooken: api/src/routes/cms.js
+hantering av cache: api/src/cms/contentful.js
+
 ### Kvar att förstå
+
+Vilka nycklar som behövs i .env och vilka som får göra vad. Hur används de kontra en hemlighet.
 
 ### Siktar på VG
 
