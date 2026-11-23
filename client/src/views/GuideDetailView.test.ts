@@ -17,7 +17,18 @@ const guide = {
   region: "Lappland",
   difficulty: "medel",
   lengthKm: 12,
-  bodyHtml: "<p>Gå norrut.</p>",
+  body: [
+    {
+      type: "HEADING_2",
+      runs: [{ text: "Vägen dit", bold: false, italic: false, href: null }],
+      items: null,
+    },
+    {
+      type: "PARAGRAPH",
+      runs: [{ text: "Gå norrut.", bold: false, italic: false, href: null }],
+      items: null,
+    },
+  ] as unknown[] | null,
   notices: [] as unknown[],
 };
 
@@ -61,6 +72,23 @@ describe("GuideDetailView", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Lappland · medel · 12 km")).toBeInTheDocument();
     expect(screen.getByText("Gå norrut.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Vägen dit" }),
+    ).toBeInTheDocument();
+  });
+
+  // #199: null = texten saknas i Contentful eller CMS:et är nere. Resten av guiden kommer ur
+  // Postgres och syns ändå.
+  it("shows a short line instead of the body when body is null", async () => {
+    respondWith({ data: { guide: { ...guide, body: null } } });
+    renderView();
+
+    expect(
+      await screen.findByText("Guidens text kunde inte hämtas just nu."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Kungsleden" }),
+    ).toBeInTheDocument();
   });
 
   it("shows the guide's notices", async () => {

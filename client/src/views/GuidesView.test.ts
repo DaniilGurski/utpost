@@ -15,14 +15,14 @@ vi.mock("@urql/vue", async (importOriginal) => ({
 
 const mockedUseQuery = vi.mocked(useQuery);
 
-const makeGuide = (title: string, id = 0) => ({
+const makeGuide = (title: string, id = 0, excerpt: string | null = null) => ({
   id: String(id),
   title,
   slug: title.split(" ").join("-").toLowerCase(),
   region: "",
   difficulty: "",
   lengthKm: 10,
-  bodyHtml: "",
+  excerpt,
 });
 
 const makeNotice = (title: string, status = "published") => ({
@@ -123,6 +123,21 @@ describe("GuidesView", () => {
 
     expect(screen.getByText("Inga träffar")).toBeInTheDocument();
     expect(screen.queryByText("Kungsleden")).not.toBeInTheDocument();
+  });
+
+  // #199: utdraget är ren text från API:et – en tagg i det förblir text
+  it("shows the excerpt as plain text on the card", async () => {
+    respondWithGuides([
+      makeGuide("Kungsleden", 1, "Ta med <b>vatten</b>."),
+      makeGuide("Sarek", 2, null),
+    ]);
+    const { container } = renderView();
+
+    expect(
+      await screen.findByText("Ta med <b>vatten</b>."),
+    ).toBeInTheDocument();
+    expect(container.querySelector("b")).toBeNull();
+    expect(screen.getByText("Sarek")).toBeInTheDocument();
   });
 
   it("shows the error message when GraphQL returns an error", async () => {

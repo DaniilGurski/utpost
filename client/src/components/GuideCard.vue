@@ -7,7 +7,8 @@ export interface GuideCardGuide {
   region: string;
   difficulty: string;
   lengthKm: number;
-  bodyHtml: string;
+  /** #199: ren text, kortad i API:et. null när texten inte gick att hämta ur CMS:et */
+  excerpt?: string | null;
 }
 
 const props = defineProps<{ guide: GuideCardGuide }>();
@@ -24,6 +25,6 @@ const props = defineProps<{ guide: GuideCardGuide }>();
       {{ props.guide.region }} · {{ props.guide.difficulty }} ·
       {{ props.guide.lengthKm }} km
     </p>
-    <div v-html="props.guide.bodyHtml.slice(0, 180)"></div>
+    <p v-if="props.guide.excerpt">{{ props.guide.excerpt }}</p>
   </div>
 </template>

@@ -14,7 +14,6 @@ export const typeDefs = /* GraphQL */ `
     region: String!
     difficulty: String!
     lengthKm: Float!
-    bodyHtml: String! @deprecated(reason: "Använd body. Tas bort i #199 när klienten slutat fråga efter den.")
     "Guidens text ur CMS:et (#198). null = texten saknas i Contentful, eller CMS:et är nere/avstängt"
     body: [Block!]
     "Ren text ur första stycket, högst ~180 tecken. Räknas fram i API:et. null när body är null"
