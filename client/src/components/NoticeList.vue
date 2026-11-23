@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Notice } from "../lib/notices";
+import { paragraphBlocks, type Notice } from "../lib/notices";
 import RichText from "./RichText.vue";
 
 // M9: redaktionens notiser. Innehållet kommer ur CMS:et via vårt eget GraphQL-API – komponenten
@@ -32,7 +32,7 @@ const STATUS: Record<string, string> = {
           STATUS[notice.status]
         }}</span>
       </h3>
-      <RichText :paragraphs="notice.body" />
+      <RichText :blocks="paragraphBlocks(notice.body)" />
       <p v-if="notice.guideSlug" class="muted">
         Gäller
         <RouterLink :to="`/guide/${notice.guideSlug}`"

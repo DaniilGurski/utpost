@@ -8,6 +8,9 @@ export type Incremental<T> =
       [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
     };
 import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+/** Vad ett block i guidens text ÄR – klienten bestämmer hur det ser ut */
+export type BlockType = "HEADING_2" | "HEADING_3" | "LIST" | "PARAGRAPH";
+
 export type GuideDetailsQueryVariables = Exact<{
   slug: string;
 }>;
@@ -18,7 +21,23 @@ export type GuideDetailsQuery = {
     region: string;
     difficulty: string;
     lengthKm: number;
-    bodyHtml: string;
+    body: Array<{
+      type: BlockType;
+      runs: Array<{
+        text: string;
+        bold: boolean;
+        italic: boolean;
+        href: string | null;
+      }>;
+      items: Array<
+        Array<{
+          text: string;
+          bold: boolean;
+          italic: boolean;
+          href: string | null;
+        }>
+      > | null;
+    }> | null;
     notices: Array<{
       id: string;
       title: string;
@@ -49,7 +68,7 @@ export type GuidesPageQuery = {
     region: string;
     difficulty: string;
     lengthKm: number;
-    bodyHtml: string;
+    excerpt: string | null;
   }>;
   notices: Array<{
     id: string;
@@ -147,7 +166,66 @@ export const GuideDetailsDocument = {
                 { kind: "Field", name: { kind: "Name", value: "region" } },
                 { kind: "Field", name: { kind: "Name", value: "difficulty" } },
                 { kind: "Field", name: { kind: "Name", value: "lengthKm" } },
-                { kind: "Field", name: { kind: "Name", value: "bodyHtml" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "body" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "type" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "runs" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "text" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "bold" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "italic" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "href" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "items" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "text" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "bold" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "italic" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "href" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "notices" },
@@ -248,7 +326,7 @@ export const GuidesPageDocument = {
                 { kind: "Field", name: { kind: "Name", value: "region" } },
                 { kind: "Field", name: { kind: "Name", value: "difficulty" } },
                 { kind: "Field", name: { kind: "Name", value: "lengthKm" } },
-                { kind: "Field", name: { kind: "Name", value: "bodyHtml" } },
+                { kind: "Field", name: { kind: "Name", value: "excerpt" } },
               ],
             },
           },

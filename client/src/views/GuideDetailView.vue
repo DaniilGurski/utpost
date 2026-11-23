@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useQuery } from "@urql/vue";
 import NoticeList from "../components/NoticeList.vue";
+import RichText from "../components/RichText.vue";
 import { graphql } from "../gql";
 
 const props = defineProps<{ slug: string }>();
@@ -14,7 +15,21 @@ const { data, fetching, error } = useQuery({
         region
         difficulty
         lengthKm
-        bodyHtml
+        body {
+          type
+          runs {
+            text
+            bold
+            italic
+            href
+          }
+          items {
+            text
+            bold
+            italic
+            href
+          }
+        }
         notices {
           id
           title
@@ -48,8 +63,9 @@ const guide = computed(() => data.value?.guide ?? null);
     <h1>{{ guide.title }}</h1>
     <p>{{ guide.region }} · {{ guide.difficulty }} · {{ guide.lengthKm }} km</p>
     <NoticeList :notices="guide.notices" />
-    <!-- Guidetexten skrivs av redaktionen och litas på, så den saneras inte -->
-    <div v-html="guide.bodyHtml"></div>
+    <!-- #199: texten kommer ur CMS:et som block, inte HTML. null = saknas eller CMS:et nere -->
+    <RichText v-if="guide.body" :blocks="guide.body" />
+    <p v-else>Guidens text kunde inte hämtas just nu.</p>
   </div>
 </template>
 

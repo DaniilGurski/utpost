@@ -23,7 +23,7 @@ const { data, fetching, error } = useQuery({
         region
         difficulty
         lengthKm
-        bodyHtml
+        excerpt
       }
       notices(preview: $preview) {
         id
