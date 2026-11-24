@@ -11,6 +11,7 @@
 | Cloud 1                  | V44          | PR #141, PR #142, PR #144, PR #145, PR #152, PR #153, `docs/decisions/hosting.md` | -            |
 | Cloud 2                  | V45          | PR #165, PR #166/#167, PR #168, PR #169/#171, `docs/decisions/serverless.md`      | -            |
 | Fullstack 8              | V46          | PR #176, PR #177, PR #182, PR #187 `docs/security.md`                             | -            |
+| Fullstack 9              | V47          | PR #192, PR #193, PR #196, PR #200, PR #202 `docs/decisions/cms.md`               | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -247,6 +248,29 @@ Fullstack 8: PR #176 (röda tester), PR #177 (API:et lagat), PR #182 (token i mi
 ### Kvar att förstå
 
 Hur rate limiting på inloggningen görs i en större app: var den ska sitta (API:et, nginx eller Azure) och vilken gräns som är rimlig.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 47 – Headless CMS
+
+**Kursmål:** Fullstack 9
+
+### Vad jag förstått
+
+Fullstack 9:
+
+- Guidernas text låg som `body_html` i Postgres och sattes in med `v-html`, som stoppar in all HTML som den är. Guiderna skrivs av redaktörer, så ett dåligt eller kapat redaktörskonto räcker för XSS. Nu är texten rich text i Contentful, och klienten bygger elementen själv från noderna (#193, #200), så ingen HTML stoppas in
+- Management-nyckeln används bara av skripten för setup och migrering, aldrig av appen. Appen använder delivery för publicerat innehåll och preview för utkast. API:et cachar notiserna i upp till 60 s för att spara anrop, så utan webhook kan en ändring dröja en minut. Med webhooken (#196) anropar Contentful vårt API vid publicering, API:et tömmer cachen och nästa anrop hämtar det nya
+
+### Var det syns i mitt arbete
+
+Fullstack 9: PR #192 (CMS-lagret bakom API:et), PR #193 (rich text som data, förhandsgranskning), PR #196 (webhook), PR #200 (innehållstyp för guiderna, migreringsskript), PR #202 (`docs/decisions/cms.md`)
+
+### Kvar att förstå
+
+Guidernas text ligger nu också i Contentful, men notiserna kopplas fortfarande till en guide med strängen `guideSlug`. Borde det vara en referens till guidens entry i Contentful i stället, så att en felstavning inte kan hända?
 
 ### Siktar på VG
 
