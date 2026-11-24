@@ -10,6 +10,7 @@
 | Fullstack 2 · Cloud 6    | V43          | PR #118, PR #119, PR #120, PR #122/#125, PR #124, PR #133, `README.md`            | -            |
 | Cloud 1                  | V44          | PR #141, PR #142, PR #144, PR #145, PR #152, PR #153, `docs/decisions/hosting.md` | -            |
 | Cloud 2                  | V45          | PR #165, PR #166/#167, PR #168, PR #169/#171, `docs/decisions/serverless.md`      | -            |
+| Fullstack 8              | V46          | PR #176, PR #177, PR #182, PR #187 `docs/security.md`                             | -            |
 
 ## Vecka 38 – Ramverket och arbetssättet
 
@@ -222,6 +223,30 @@ Cloud 2: PR #165 (funktionen i Azure, nyckel till staging), PR #166/#167 (jobbet
 ### Kvar att förstå
 
 Hur API:et kan slippa vänta på funktionen (kö i stället för synkront HTTP-anrop). Lokalt blev uppladdningen knappt snabbare.
+
+### Siktar på VG
+
+Nej.
+
+## Vecka 46 – OWASP
+
+**Kursmål:** Fullstack 8
+
+### Vad jag förstått
+
+Fullstack 8:
+
+- Största risken var A01 Broken Access Control: routes för att ta bort och ändra saknade kontroll, så vem som helst kunde ta bort turer och ändra guider utan att logga in. Först skrevs tester som var röda (#176), sedan fixen (#177). Att testet är rött först visar att det verkligen fångar hålet, ett test som skrivs efteråt kan vara grönt även om det testar fel sak
+- Klienten håller token i minnet (#182), inte i `localStorage`, eftersom ett skadligt skript kan läsa `localStorage` men inte minnet. Priset är att en omladdning loggar ut, vilket en refresh-token kan lösa
+- Jobbet _Säkerhet_ i pipelinen (teamets PR #184) kör npm audit (sårbara paket), Trivy (sårbarheter och felkonfiguration i repot och api-imagen) och ZAP (kollar HTTP-svaren från appen, t.ex. saknade säkerhetsheaders). Ett fynd på high eller critical gör jobbet rött och blockerar merge, som när en gammal express gjorde det rött (#185)
+
+### Var det syns i mitt arbete
+
+Fullstack 8: PR #176 (röda tester), PR #177 (API:et lagat), PR #182 (token i minnet, skyddad route), PR #187 (`docs/security.md`)
+
+### Kvar att förstå
+
+Hur rate limiting på inloggningen görs i en större app: var den ska sitta (API:et, nginx eller Azure) och vilken gräns som är rimlig.
 
 ### Siktar på VG
 
