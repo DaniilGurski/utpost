@@ -2,23 +2,31 @@
 
 _Ett av teamets beslutsdokument. Skrivs i M9. Högst en sida. Ni ska inte utvärdera marknaden, ni ska kunna försvara valet: varför det här räcker för Utpost, vad ni valde bort, och vad som hade fått er att byta._
 
-**Datum:** 2026-11-20
-**Beslut:** Notiser (title, text, level, guideSlug) bor i Contentful. Guides och tours ligger kvar i Postgres, eftersom de är data med relationer och inte innehåll som redaktörer ändrar ofta.
+**Datum:** 2026-11-24 (första versionen 2026-11-20)
+**Beslut:** Redaktionens text bor i Contentful: notiserna och guidernas text. Själva guiden (slug, titel, region, svårighetsgrad, längd, bild, publicerad eller inte) och tours ligger kvar i Postgres.
+
+> _"Postgres äger guiden, Contentful äger texten. De kopplas ihop med id: guide 7 = posten `guide-7`. Därför kan migreringen köras om: den skriver till samma 40 id:n varje gång."_
 
 ## Bakgrund
 
-Redaktionens innehåll låg som `body_html` i Postgres och sattes in med `v-html` (se `GuideDetailView.vue` och `GuideCard.vue`). Varje ändring krävde en utvecklare och en deploy, och `v-html` med redigerbar HTML är en XSS-risk. Notiser är nu flyttade; guiderna har skulden kvar.
+Redaktionens innehåll låg som `body_html` i Postgres och sattes in med `v-html`. Varje ändring krävde en utvecklare och en deploy, och `v-html` med redigerbar HTML är en XSS-risk. Först flyttade notiserna (övningen), sedan guidernas text (#197), som är det redaktörerna faktiskt mejlar om. Ingen `v-html` finns kvar i klienten.
 
 ## Innehållsmodellen
 
-| Innehållstyp | Fält      | Typ      | Varför ett eget fält                                                      |
-| ------------ | --------- | -------- | ------------------------------------------------------------------------- |
-| Notis        | title     | Symbol   | Rubrik i notisen och i listor                                             |
-| Notis        | text      | RichText | Redaktören formaterar utan HTML; klienten renderar noderna, inte `v-html` |
-| Notis        | level     | Symbol   | Klienten väljer ikon/färg utifrån nivån: det är data, inte utseende       |
-| Notis        | guideSlug | Symbol   | Nyckeln som kopplar en notis till en guide i Postgres                     |
+| Innehållstyp | Fält          | Typ      | Varför ett eget fält                                                                    |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------------------------- |
+| Notis        | title         | Symbol   | Rubrik i notisen och i listor                                                           |
+| Notis        | text          | RichText | Redaktören formaterar utan HTML; klienten renderar noderna, inte `v-html`               |
+| Notis        | level         | Symbol   | Klienten väljer ikon/färg utifrån nivån: det är data, inte utseende                     |
+| Notis        | guideSlug     | Symbol   | Nyckeln som kopplar en notis till en guide i Postgres                                   |
+| Guide        | internalTitle | Symbol   | Bara för att redaktören ska hitta rätt post; API:et läser det aldrig                    |
+| Guide        | body          | RichText | Guidens text: rubrik (h2, h3), stycke, punktlista, kursiv. API:et gör om den till block |
 
-Innehåll är det redaktören skriver och ändrar (notisens text). Data är det som har struktur och relationer (guidens längd, svårighetsgrad, tours), och det ligger kvar i Postgres. API:et hämtar notiserna och filtrerar på `notice.guideSlug === guide.slug` i resolvern. Slugen är en vanlig sträng utan främmande nyckel, så en felstavning ger en notis som tyst aldrig visas.
+Innehåll är det redaktören skriver och ändrar (texten). Data är fakta som listan filtrerar på och visar (region, svårighetsgrad, längd), och de ska fungera när CMS:et är nere, så de ligger kvar i Postgres. Bilden är ett filnamn, inte en asset. Slugen ägs av utvecklarna och har inget fält i Contentful.
+
+**Guide ↔ post:** post-id `guide-<id i Postgres>`. Id:t är stabilt (seeden kör `restart identity` och lägger in guiderna i samma ordning), ett post-id i Contentful går inte att byta, och bara seeden skapar guider. API:et hämtar alla guidetexter i ett anrop och slår upp på id. Utdraget på guidekortet räknas fram i API:et ur första stycket.
+
+**Notis ↔ guide: vi behåller `guideSlug`.** Seeden är deterministisk, så slugen överlever en omseedning. En Reference till guideposten vore nästa steg (då kan en felstavad slug inte tyst ge en notis som aldrig visas), men vi hoppade över den inför deadline och för att notiser är sällsynta.
 
 ## Alternativ
 
@@ -31,7 +39,7 @@ Innehåll är det redaktören skriver och ändrar (notisens text). Data är det 
 
 ## Motivering
 
-Utpost är en skoluppgift utan riktiga användare: få redaktörer som ändrar notiser sällan. Free plan räcker gott, och redaktörer slipper gå via utvecklare.
+Utpost är en skoluppgift utan riktiga användare: få redaktörer som ändrar text sällan. Free plan räcker gott, och redaktörer slipper gå via utvecklare.
 
 ## Vad som hade fått oss att byta
 
@@ -42,9 +50,10 @@ Gränser: [Contentful pricing](https://www.contentful.com/pricing/), 100 000 API
 
 ## Konsekvenser
 
-- **CMS nere:** API:et loggar felet och svarar med senast hämtade notiser, eller en tom lista. Guiderna går ändå att läsa.
-- **Publicering:** utan webhook syns en ändring efter upp till 60 s (cachen, `CMS_CACHE_SECONDS`) för att spara API-anrop. Med webhooken töms cachen vid publicering och ändringen syns direkt.
-- **Vid byte av CMS:** `api/src/cms/contentful.js`, webhook-routen och `.env`-variablerna skrivs om. Schemat, klienten, guides och tours påverkas inte.
+- **Migreringen** (`npm run cms:migrate-guides`, körs lokalt av space-ägaren): ca 121 anrop per körning (1 för språket + läs, skriv, publicera per guide), varav 80 skrivningar. 200 ms paus mellan anropen (≤ 5/s, taket är 7). Vid 429 väntar skriptet så många sekunder som Contentful anger och försöker igen, högst 5 gånger. En tagg som inte stöds stoppar körningen innan något skrivs.
+- **CMS nere:** API:et loggar felet och svarar med det senast hämtade. Har inget hämtats visas guidesidan med titel, fakta och bild ur Postgres och raden ”Guidens text kunde inte hämtas just nu.” i stället för texten; guidekortet visas utan utdrag. Notiserna blir en tom lista.
+- **Publicering:** webhooken tömmer cachen, så ändringen syns direkt. Utan webhook syns den efter upp till 60 s (`CMS_CACHE_SECONDS`). Vi behåller 60 s: bara teamet använder Utpost, och det sparar API-anrop.
+- **Vid byte av CMS:** `api/src/cms/contentful.js`, webhook-routen, migreringsskriptet och `.env`-variablerna skrivs om. Schemat och klienten påverkas inte.
 
 ### Labben
 
@@ -52,7 +61,7 @@ Gränser: [Contentful pricing](https://www.contentful.com/pricing/), 100 000 API
 
 - Delivery: läser publicerat innehåll. Appen använder den.
 - Preview: läser även utkast. Används för förhandsgranskning.
-- Management: har skrivrättigheter. Används bara av `cms:setup` i steg 1, aldrig av appen.
+- Management: har skrivrättigheter. Används bara av `cms:setup` och `cms:migrate-guides`, aldrig av appen.
 
 Alla ligger i `.env` på servern; klienten ser dem aldrig.
 
