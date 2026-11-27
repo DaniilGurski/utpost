@@ -133,6 +133,52 @@ jobs:
       - name: Loggar från appen (bara om något gick fel)
         if: failure()
         run: docker compose logs --tail 50 api client
+
+  # M10: prestandabudgeten – ett test som alla andra, fast det mäter vikt och tid i stället för rätt och fel.
+  # Rött här blockerar merge (rulesetet main guard kräver "Prestanda").
+  performance:
+    name: Prestanda
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Pipelinen har ingen .env. Compose behöver variablerna, så vi skapar en med testvärden (som Säkerhet).
+      - name: Skapa .env med testvärden (bara för jobbet)
+        run: |
+          cat > .env <<'EOF'
+          POSTGRES_USER=utpost
+          POSTGRES_PASSWORD=utpost
+          POSTGRES_DB=utpost
+          MONGO_USER=utpost
+          MONGO_PASSWORD=utpost
+          EOF
+
+      - name: Bygg imagerna och starta appen (compose)
+        run: docker compose up -d --build --wait
+
+      # Skriptet väntar själv tills API:et har seedat och svarar. Det behöver inga node_modules:
+      # Lighthouse CI hämtas med npx, och Chrome finns redan på runnern.
+      - name: Mät – Lighthouse mot startsidan, en guide och en tur
+        run: npm run perf -- --runs 3
+
+      - name: Budgeten – gränserna i lighthouserc.json
+        run: npx --yes @lhci/cli@0.16.1 assert
+
+      - name: Spara rapporterna
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-rapporter
+          path: .lighthouseci
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Loggar från appen (bara om något gick fel)
+        if: failure()
+        run: docker compose logs --tail 50 api client
   build:
     name: Bygg
     runs-on: ubuntu-latest
