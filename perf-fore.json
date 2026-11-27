@@ -1,0 +1,23 @@
+{
+  "Startsidan": {
+    "lcp": 0.8,
+    "cls": 0,
+    "js": 144,
+    "images": 0,
+    "total": 158
+  },
+  "En guide": {
+    "lcp": 2,
+    "cls": 0,
+    "js": 144,
+    "images": 0,
+    "total": 152
+  },
+  "En tur": {
+    "lcp": 2,
+    "cls": 0,
+    "js": 144,
+    "images": 0,
+    "total": 155
+  }
+}
