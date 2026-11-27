@@ -25,7 +25,8 @@
     "build": "npm run build -w client",
     "seed": "npm run seed -w api",
     "codegen": "npm run codegen -w client",
-    "typecheck": "npm run codegen && npm run typecheck -w client && npm run typecheck -w api"
+    "typecheck": "npm run codegen && npm run typecheck -w client && npm run typecheck -w api",
+    "perf": "node scripts/perf.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
