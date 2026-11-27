@@ -160,7 +160,7 @@ jobs:
         run: docker compose up -d --build --wait
 
       - name: Seeda databasen
-        run: docker compose exec -T api npm run seed
+        run: docker compose exec -T api node api/src/db/seed.js
 
       # Skriptet väntar själv tills API:et har seedat och svarar. Det behöver inga node_modules:
       # Lighthouse CI hämtas med npx, och Chrome finns redan på runnern.
